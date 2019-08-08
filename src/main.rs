@@ -1,12 +1,22 @@
+fn double(n: i32) -> i32 {
+    n + n
+}
+
+fn abs(n: i32) -> i32 {
+    if n >= 0 {
+        n
+    } else {
+        -n
+    }
+}
+
 fn main() {
-    let c1 = 'A';
-    let c1_ptr: &char = &c1; // &char 型。不変の参照。
-    assert_eq!(*c1_ptr, 'A');
+    let mut f: fn(i32) -> i32 = double; // `fn(i32) -> i32` が関数ポインタ型
+    assert_eq!(f(-42), -84);
 
-    let mut n1 = 0;
-    let n1_ptr: &mut i32 = &mut n1; // &mut i32 型。可変の参照。
-    assert_eq!(*n1_ptr, 0);
+    f = abs; // abs も double 同様型が `fn(i32) -> i32` で合うため代入できる
+    assert_eq!(f(-42), 42);
 
-    *n1_ptr = 1_000;
-    assert_eq!(*n1_ptr, 1_000);
+    // 関数ポインタはポインタの一種なのでサイズは usize 型と同じ
+    assert_eq!(std::mem::size_of_val(&f), std::mem::size_of::<usize>());
 }
