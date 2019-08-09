@@ -1,10 +1,4 @@
 fn main() {
-    let s = "かか\u{3099}く";
-    println!("{}", s); // かがく
-
-    let mut iter = s.chars();
-    assert_eq!(iter.next(), Some('か'));
-    assert_eq!(iter.next(), Some('か'));
-    assert_eq!(iter.next(), Some('\u{3099}'));
-    assert_eq!(iter.next(), Some('く'));
+    let a: [u8; 4] = [0x61, 0xe3, 0x81, 0x82];
+    assert_eq!(std::str::from_utf8(&a), Ok("aあ"));
 }
