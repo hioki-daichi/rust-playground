@@ -1,10 +1,12 @@
 fn main() {
-    let v1 = vec![3, 4, 5];
+    let mut s1 = String::from("Type coercion ");
+    let s2 = String::from("is actually easy.");
 
-    // Vec<i32> 型からスライス &[i32] 型へ型強制されることによって
-    // スライスに備わった first(&self) メソッドが使用できる
-    assert_eq!(Some(&3), v1.first());
+    // push_str() のシグネチャは push_str(self: &mut String, s: &str)
+    // 型強制によって s1 は String 型から &mut String 型へ、
+    //                s2 は String 型から &str 型へ変換される。
+    s1.push_str(&s2);
 
     // もし型強制がなかったら
-    assert_eq!(Some(&3), (&v1[..]).first());
+    (&mut s1).push_str(s2.as_str());
 }
