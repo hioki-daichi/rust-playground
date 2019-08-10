@@ -1,7 +1,10 @@
-fn main() {
-    assert_eq!("10".parse::<i32>(), Ok(10));
+fn f(a: &str, b: &str) -> Result<i32, std::num::ParseIntError> {
+    let x = a.parse::<i32>()?;
+    let y = b.parse::<i32>()?;
+    Ok(x + y)
+}
 
-    let r = "a".parse::<i32>();
-    assert!(r.is_err());
-    println!("{:?}", r); // Err(ParseIntError { kind: InvalidDigit })
+fn main() {
+    assert_eq!(f("1", "2"), Ok(3));
+    assert!(f("1", "a").is_err());
 }
