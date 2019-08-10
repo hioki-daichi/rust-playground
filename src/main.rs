@@ -1,19 +1,16 @@
-fn f1(n: &mut usize, str: &str, slice: &[i32]) {
-    *n = str.len() + slice.len()
+fn f(slice: &mut [usize]) {
+    // ポインタの弱体化 (mutability の除去)
+    // &mut [usize] -> &[usize]
+    let len = g(slice);
+    slice[0] = len;
+}
+
+fn g(slice: &[usize]) -> usize {
+    slice.len()
 }
 
 fn main() {
-    let mut b: Box<usize> = Box::new(0);
-    let s: String = String::from("foo");
-    let v: Vec<i32> = vec![1];
-
-    // Deref による型強制が起こる
-    //
-    //     &mut Box<usize> -> &mut usize
-    //     &String         -> &str
-    //     &Vec<i32>       -> &[i32]
-    //
-    f1(&mut b, &s, &v);
-
-    assert_eq!(4, *b);
+    let mut v: Vec<usize> = vec![0; 10];
+    f(&mut v); // Deref による型強制: &mut Vec<usize> -> &mut [usize]
+    assert_eq!(10, v[0]);
 }
