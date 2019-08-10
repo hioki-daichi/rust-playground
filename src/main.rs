@@ -1,16 +1,12 @@
-fn f(slice: &mut [usize]) {
-    // ポインタの弱体化 (mutability の除去)
-    // &mut [usize] -> &[usize]
-    let len = g(slice);
-    slice[0] = len;
-}
-
-fn g(slice: &[usize]) -> usize {
-    slice.len()
+fn f(p: Box<[i32]>) -> i32 {
+    p[0]
 }
 
 fn main() {
-    let mut v: Vec<usize> = vec![0; 10];
-    f(&mut v); // Deref による型強制: &mut Vec<usize> -> &mut [usize]
-    assert_eq!(10, v[0]);
+    let xs: [i32; 4] = [1, 2, 3, 4];
+
+    let b: Box<[i32; 4]> = Box::new(xs);
+
+    // Box<[i32; 4]> から Box<[i32]> へサイズの不定化が行われている
+    assert_eq!(1, f(b));
 }
