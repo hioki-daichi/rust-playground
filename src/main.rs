@@ -1,41 +1,24 @@
-#[derive(Default, Debug)]
-pub struct Polygon<T> {
-    pub vertexes: Vec<T>,
+#[derive(Default)]
+struct A {
+    f0: u8,
+    f1: u32, // x86_64 アーキテクチャでは i32 は 4 の倍数のアドレスにアラインされていることを要求する
+    f2: u8,
 }
-
-// 座標
-trait Coordinates {}
-
-// デカルト座標
-#[derive(Default, Debug)]
-struct CartesianCoord {
-    x: f64,
-    y: f64,
-}
-impl Coordinates for CartesianCoord {}
-
-// 極座標
-#[derive(Default, Debug)]
-struct PolarCoord {
-    r: f64,
-    theta: f64,
-}
-impl Coordinates for PolarCoord {}
 
 fn main() {
-    // デカルト座標
-    let v1 = vec![CartesianCoord { x: 0.0, y: 0.0 }];
-    let p1 = Polygon {
-        vertexes: v1,
-        ..Default::default()
-    };
-    println!("{:?}", p1); // Polygon { vertexes: [CartesianCoord { x: 0.0, y: 0.0 }] }
-
-    // 極座標
-    let v2 = vec![PolarCoord { r: 0.0, theta: 0.0 }];
-    let p2 = Polygon {
-        vertexes: v2,
-        ..Default::default()
-    };
-    println!("{:?}", p2); // Polygon { vertexes: [PolarCoord { r: 0.0, theta: 0.0 }] }
+    let a: A = Default::default();
+    println!(
+        "struct A ({} bytes) \n  \
+         f0: {:p}\n  \
+         f1: {:p}\n  \
+         f2: {:p}\n", // {:p} で格納されているアドレスを表示
+        std::mem::size_of::<A>(),
+        &a.f0,
+        &a.f1,
+        &a.f2
+    );
+    // struct A (8 bytes)
+    //   f0: 0x7ffee06c45f4 // 末尾 4 のため、f1 より後に定義されていることがわかる
+    //   f1: 0x7ffee06c45f0 // 末尾 0 のため、f0 より先に定義されていることがわかる
+    //   f2: 0x7ffee06c45f5
 }
