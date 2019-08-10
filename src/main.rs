@@ -1,8 +1,8 @@
 #[derive(Debug, PartialEq)]
-struct UniqueValue();
+struct UniqueValue;
 
 fn main() {
-    let a = UniqueValue();
-    let b = UniqueValue();
+    let a = UniqueValue;
+    let b = UniqueValue;
     assert_eq!(a, b);
 }
