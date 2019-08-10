@@ -1,12 +1,11 @@
 fn main() {
-    // このタプルはスタックに置かれる。
-    let t1: (i32, String) = (3, "birds".to_string());
+    let mut v1: Vec<i32> = vec![0, 1, 2, 3];
 
-    // Box ポインタを作ることでタプルがヒープに移動する。
-    let mut b1 = Box::new(t1);
+    // 余分なメモリを確保する様子
+    println!("capacity: {}", v1.capacity()); // capacity: 4
+    v1.push(4);
+    println!("capacity: {}", v1.capacity()); // capacity: 8
 
-    // * で参照外しすることで参照先にアクセスする。
-    (*b1).0 += 1;
-
-    assert_eq!(*b1, (4, "birds".to_string()));
+    // Box<[i32]> に変換すると Vec の shrink_to_fit() が呼ばれて余分なメモリを持たなくなる様子
+    println!("capacity: {}", v1.into_boxed_slice().into_vec().capacity()); // capacity: 5
 }
