@@ -1,14 +1,5 @@
 fn main() {
-    let mut foo: String = "foo".to_string();
-    let bar: &str = "bar";
-
-    foo.push_str(bar); // String 型の文字列に &str 型の文字列を追加
-
-    assert_eq!(foo, "foobar");
-
-    let baz: String = String::from("baz");
-
-    foo.push_str(&baz); // & を付けると型強制という仕組みによって &str へ変換される
-
-    assert_eq!(foo, "foobarbaz");
+    let f: f64 = 4.3 + 0.1;
+    assert_eq!(f.to_string(), "4.3999999999999995");
+    assert_eq!(format!("{:.2}", f), "4.40");
 }
