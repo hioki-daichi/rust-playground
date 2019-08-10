@@ -1,29 +1,41 @@
-mod shape {
-    #[derive(Debug, Default)]
-    pub struct Polygon {
-        pub vertexes: Vec<(i32, i32)>,
-        pub stroke_width: u8,
-        pub fill: (u8, u8, u8),
-        internal_id: String,
-    }
-
-    pub fn new_polygon(vertexes: Vec<(i32, i32)>, stroke_width: u8, fill: (u8, u8, u8)) -> Polygon {
-        Polygon {
-            vertexes,
-            stroke_width,
-            fill,
-            internal_id: "550e8400-e29b-41d4-a716-446655440000".to_string(),
-        }
-    }
+#[derive(Default, Debug)]
+pub struct Polygon<T> {
+    pub vertexes: Vec<T>,
 }
 
-use shape::new_polygon;
+// 座標
+trait Coordinates {}
+
+// デカルト座標
+#[derive(Default, Debug)]
+struct CartesianCoord {
+    x: f64,
+    y: f64,
+}
+impl Coordinates for CartesianCoord {}
+
+// 極座標
+#[derive(Default, Debug)]
+struct PolarCoord {
+    r: f64,
+    theta: f64,
+}
+impl Coordinates for PolarCoord {}
 
 fn main() {
-    let p = new_polygon(vec![(0, 0)], 1, (0, 0, 0));
+    // デカルト座標
+    let v1 = vec![CartesianCoord { x: 0.0, y: 0.0 }];
+    let p1 = Polygon {
+        vertexes: v1,
+        ..Default::default()
+    };
+    println!("{:?}", p1); // Polygon { vertexes: [CartesianCoord { x: 0.0, y: 0.0 }] }
 
-    println!("{:?}", p.vertexes); // [(0, 0)]
-    println!("{:?}", p.stroke_width); // 1
-    println!("{:?}", p.fill); // (0, 0, 0)
-    println!("{:?}", p.internal_id); // field `internal_id` of struct `shape::Polygon` is private
+    // 極座標
+    let v2 = vec![PolarCoord { r: 0.0, theta: 0.0 }];
+    let p2 = Polygon {
+        vertexes: v2,
+        ..Default::default()
+    };
+    println!("{:?}", p2); // Polygon { vertexes: [PolarCoord { r: 0.0, theta: 0.0 }] }
 }
