@@ -1,4 +1,12 @@
 fn main() {
-    let a: [u8; 4] = [0x61, 0xe3, 0x81, 0x82];
-    assert_eq!(std::str::from_utf8(&a), Ok("aあ"));
+    // このタプルはスタックに置かれる。
+    let t1: (i32, String) = (3, "birds".to_string());
+
+    // Box ポインタを作ることでタプルがヒープに移動する。
+    let mut b1 = Box::new(t1);
+
+    // * で参照外しすることで参照先にアクセスする。
+    (*b1).0 += 1;
+
+    assert_eq!(*b1, (4, "birds".to_string()));
 }
