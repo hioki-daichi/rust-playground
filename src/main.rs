@@ -1,10 +1,12 @@
 fn main() {
-    let a: Box<std::fmt::Debug>;
+    let a: Vec<u8> = vec![1];
 
-    let b: [i32; 2] = [1, 2];
-    let c: Option<i32> = Some(1);
-
-    // ある型が Debug トレイトを実装していればその型からトレイトオブジェクトへ型強制できる
-    a = Box::new(b); // Box<[i32; 2]>  -> Box<Debug>
-    a = Box::new(c); // Box<Some<i32>> -> Box<Debug>
+    // a.first() の際に、レシーバの型強制が起きている。
+    // a は Vec<u8> 型だが、この型に first() は定義されていないため、
+    // 以下のように暗黙的に型強制されていく。
+    //
+    //     1. Deref による型強制: Vec<u8> -> [u8]
+    //     2. レシーバの参照化:   [u8]    -> &[u8]
+    //
+    assert_eq!(a.first(), Some(&1u8));
 }
