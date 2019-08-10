@@ -1,12 +1,19 @@
+fn f1(n: &mut usize, str: &str, slice: &[i32]) {
+    *n = str.len() + slice.len()
+}
+
 fn main() {
-    let mut s1 = String::from("Type coercion ");
-    let s2 = String::from("is actually easy.");
+    let mut b: Box<usize> = Box::new(0);
+    let s: String = String::from("foo");
+    let v: Vec<i32> = vec![1];
 
-    // push_str() のシグネチャは push_str(self: &mut String, s: &str)
-    // 型強制によって s1 は String 型から &mut String 型へ、
-    //                s2 は String 型から &str 型へ変換される。
-    s1.push_str(&s2);
+    // Deref による型強制が起こる
+    //
+    //     &mut Box<usize> -> &mut usize
+    //     &String         -> &str
+    //     &Vec<i32>       -> &[i32]
+    //
+    f1(&mut b, &s, &v);
 
-    // もし型強制がなかったら
-    (&mut s1).push_str(s2.as_str());
+    assert_eq!(4, *b);
 }
