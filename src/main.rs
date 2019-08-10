@@ -1,14 +1,10 @@
 fn main() {
-    let f1: f32 = 0.1234e+3;
+    let v1 = vec![3, 4, 5];
 
-    println!("{}", f1); // 123.4
+    // Vec<i32> 型からスライス &[i32] 型へ型強制されることによって
+    // スライスに備わった first(&self) メソッドが使用できる
+    assert_eq!(Some(&3), v1.first());
 
-    // 型キャストはデータ変換を伴う
-    let i1 = f1 as i32;
-    println!("{}", i1); // 123
-
-    // transmute はデータ変換を伴わない。
-    // このようにビット列が変換先の型にとって無意味になったとしてもコンパイルエラーにはならない
-    let i2: i32 = unsafe { std::mem::transmute(f1) };
-    println!("{}", i2); // 1123470541
+    // もし型強制がなかったら
+    assert_eq!(Some(&3), (&v1[..]).first());
 }
