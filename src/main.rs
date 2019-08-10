@@ -1,4 +1,6 @@
 fn main() {
-    let s1 = "42";
-    assert_eq!(s1.parse::<i32>(), Ok(42));
+    // char の並びから str は作れないが String なら作れる。
+    let cs: [char; 4] = ['R', 'u', 's', 't'];
+    let s1: String = cs.iter().collect::<String>();
+    assert_eq!(s1, "Rust");
 }
