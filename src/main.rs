@@ -1,17 +1,14 @@
 fn main() {
-    let p1: Box<i32> = Box::new(10);
+    let f1: f32 = 0.1234e+3;
 
-    // 生ポインタ *mut i32 型に型キャストはできない
-    // let p2 = p1 as *mut i32; // non-primitive cast: `std::boxed::Box<i32>` as `*mut i32`    note: an `as` expression can only be used to convert between primitive types. Consider using the `From` trait
+    println!("{}", f1); // 123.4
 
-    println!("{:p}", p1); // 0x7fa42dc029d0
+    // 型キャストはデータ変換を伴う
+    let i1 = f1 as i32;
+    println!("{}", i1); // 123
 
-    // Box ポインタと *mut ポインタはどちらも同じビット幅
-    println!("{}", std::mem::size_of::<Box<i32>>()); // 8
-    println!("{}", std::mem::size_of::<*mut i32>()); // 8
-
-    // なので transmute できる
-    let p3: *mut i32 = unsafe { std::mem::transmute(p1) };
-
-    println!("{:p}", p3); // 0x7fa42dc029d0
+    // transmute はデータ変換を伴わない。
+    // このようにビット列が変換先の型にとって無意味になったとしてもコンパイルエラーにはならない
+    let i2: i32 = unsafe { std::mem::transmute(f1) };
+    println!("{}", i2); // 1123470541
 }
