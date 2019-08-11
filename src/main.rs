@@ -1,8 +1,8 @@
+#[allow(overflowing_literals)]
 fn main() {
-    let a = 0b11110000;
-    let b = 0b01010000;
-    let c = 0b00001010;
+    let u: u8 = 0b11111111;
+    let i: i8 = 0b11111111;
 
-    println!("{:08b}", a & b); // 01010000
-    println!("{:08b}", a & b | c); // 01011010
+    println!("{:08b}", u >> 2); // 00111111 (論理右シフト演算)
+    println!("{:08b}", i >> 2); // 11111111 (算術右シフト演算)
 }
