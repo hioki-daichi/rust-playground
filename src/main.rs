@@ -1,7 +1,5 @@
+const SECRET_NUMBER: i32 = 25;
+
 fn main() {
-    {
-        let x = 1;
-        println!("{}", x); // 1
-    }
-    // println!("{}", x); // cannot find value `x` in this scope    not found in this scope
+    println!("{}", SECRET_NUMBER); // 25
 }
