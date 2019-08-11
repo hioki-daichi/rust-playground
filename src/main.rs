@@ -1,13 +1,9 @@
 fn main() {
     let mut counter = 10;
 
-    let a = loop {
-        if counter == 0 {
-            break counter;
-        }
-
+    while counter != 0 {
         counter -= 1;
-    };
+    }
 
-    assert_eq!(a, 0);
+    assert_eq!(counter, 0);
 }
