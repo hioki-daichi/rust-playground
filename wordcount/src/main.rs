@@ -25,12 +25,12 @@ fn get_filename() -> String {
 }
 
 fn count(input: impl BufRead) -> HashMap<String, usize> {
-    let re = Regex::new(r"\w+").unwrap();
+    let word_regex = Regex::new(r"\w+").unwrap();
     let mut freqs = HashMap::new();
 
     for line in input.lines() {
         let line = line.unwrap();
-        for m in re.find_iter(&line) {
+        for m in word_regex.find_iter(&line) {
             let word = m.as_str().to_string();
             *freqs.entry(word).or_insert(0) += 1;
         }
