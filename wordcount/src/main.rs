@@ -12,7 +12,7 @@ fn main() {
     let filename = get_filename();
     let file = File::open(filename).expect(ERR_FILE_OPEN);
     let reader = BufReader::new(&file);
-    let frequency = calculate_frequency(reader);
+    let frequency = calculate_frequency(reader, Default::default()); // CountOption はデフォルトを使う
     println!("{:?}", frequency);
 }
 
