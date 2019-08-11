@@ -44,7 +44,7 @@ pub fn calculate_frequency(input: impl BufRead, option: CountOption) -> HashMap<
 fn test_calculate_frequency() {
     let exp = [
         (String::from("aa"), 1),
-        (String::from("bb"), 2),
+        (String::from("bb"), 1),
         (String::from("cc"), 1),
     ]
     .iter()
