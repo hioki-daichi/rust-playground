@@ -60,3 +60,13 @@ fn test_calculate_frequency() {
 fn increment(m: &mut HashMap<String, usize>, key: impl ToString) {
     *m.entry(key.to_string()).or_insert(0) += 1;
 }
+
+#[test]
+fn result_test() -> std::io::Result<()> {
+    use std::fs::{read_to_string, remove_file, write};
+    write("test.txt", "message")?;
+    let message = read_to_string("test.txt")?;
+    remove_file("test.txt")?;
+    assert_eq!(message, "message");
+    Ok(())
+}
