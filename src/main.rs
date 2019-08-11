@@ -14,9 +14,10 @@ fn main() {
     // なので以下は文の中でも宣言文で、宣言文の中でも let 文。
     let mut year = String::new();
 
-    // 以下は式文(のはず)。式文とは、式の末尾に ; を付けることで式を文に変換したもの。
+    // 以下はマクロ。マクロとは、引数を受け取り、戻り値ではなくコード片を返すもの。
     print!("Please input a year to check if it is a leap year: ");
 
+    // 以下は式文(のはず)。式文とは、式の末尾に ; を付けることで式を文に変換したもの。
     io::stdout().flush().unwrap();
     io::stdin().read_line(&mut year).unwrap();
 
