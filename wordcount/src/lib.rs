@@ -40,6 +40,23 @@ pub fn calculate_frequency(input: impl BufRead, option: CountOption) -> HashMap<
     m
 }
 
+#[test]
+fn test_calculate_frequency() {
+    let exp = [
+        (String::from("aa"), 1),
+        (String::from("bb"), 2),
+        (String::from("cc"), 1),
+    ]
+    .iter()
+    .cloned()
+    .collect::<HashMap<_, _>>();
+
+    // Cursor は内部にバイト列を保持してインメモリバッファを作るデータ型
+    let actual = calculate_frequency(std::io::Cursor::new("aa bb cc bb"), CountOption::Word);
+
+    assert_eq!(actual, exp)
+}
+
 fn increment(m: &mut HashMap<String, usize>, key: impl ToString) {
     *m.entry(key.to_string()).or_insert(0) += 1;
 }
