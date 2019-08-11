@@ -1,5 +1,8 @@
-const SECRET_NUMBER: i32 = 25;
+static mut V: Option<Vec<i32>> = None;
 
 fn main() {
-    println!("{}", SECRET_NUMBER); // 25
+    unsafe {
+        V = Some(vec![1]);
+        println!("{:?}", V); // Some([1])
+    }
 }
