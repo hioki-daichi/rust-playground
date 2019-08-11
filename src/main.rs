@@ -1,9 +1,23 @@
 fn main() {
-    let mut counter = 10;
+    let mut counter = Some(0);
 
-    while counter != 0 {
-        counter -= 1;
+    // while let 式。パターンマッチに成功した場合にループ本体が実行される。
+    while let Some(i) = counter {
+        if i == 10 {
+            counter = None;
+        } else {
+            println!("{}", i);
+            counter = Some(i + 1);
+        }
     }
-
-    assert_eq!(counter, 0);
+    // => 0
+    // => 1
+    // => 2
+    // => 3
+    // => 4
+    // => 5
+    // => 6
+    // => 7
+    // => 8
+    // => 9
 }
