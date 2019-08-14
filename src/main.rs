@@ -1,12 +1,16 @@
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
+#[derive(Debug)]
+struct Parent(u32, Child, Child);
+
+#[derive(Debug)]
+struct Child(u32);
 
 fn main() {
-    let mut letters = HashMap::new();
-    for ch in "dokonokokinoko konokinokodokono dokonokokinoko morinokinoko".chars() {
-        let e: Entry<char, i32> = letters.entry(ch);
-        let v: &mut i32 = e.or_insert(0);
-        *v += 1;
-    }
-    println!("{:?}", letters); // {'i': 5, ' ': 3, 'o': 23, 'm': 1, 'r': 1, 'd': 3, 'n': 9, 'k': 14}
+    // Child(11) と Child(12) の 2 つ値を作り、それらを Parent(1, ..) にもたせていることから
+    // Child(11) と Child(12) の所有者は Parent(1, ..) になる。
+    // (Parent(1, ..) のような値自身も別の値の所有者になれる。)
+    //
+    // また、Parent(1, ..) は変数 p に持たせているため
+    // Parent(1, ..) の所有者は p になる。
+    let p = Parent(1, Child(11), Child(12));
+    println!("{:?}", p);
 }
