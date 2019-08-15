@@ -1,13 +1,17 @@
-// Copy, Clone トレイトを実装している
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug)]
 struct Parent(u32, Child, Child);
 
-// Copy, Clone トレイトを実装している
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug)]
 struct Child(u32);
+
+fn f(p: Parent) {
+    println!("{:?}", p);
+}
 
 fn main() {
     let p1 = Parent(1, Child(11), Child(12));
-    let p2 = p1;
-    println!("{:?} {:?}", p1, p2);
+
+    f(p1);
+
+    println!("{:?}", p1); // borrow of moved value: `p1`    value borrowed here after move
 }
