@@ -5,15 +5,18 @@ struct ToyVec<T> {
 }
 
 impl<T: Default> ToyVec<T> {
-    pub fn new() -> Self {
+    pub fn new(n: usize) -> Self {
         Self {
-            elements: vec![].into_boxed_slice(),
-            len: 0,
+            elements: std::iter::repeat_with(Default::default)
+                .take(n)
+                .collect::<Vec<_>>()
+                .into_boxed_slice(),
+            len: n,
         }
     }
 }
 
 fn main() {
-    let v: ToyVec<i32> = ToyVec::new();
+    let v: ToyVec<i32> = ToyVec::new(2);
     println!("{:?}", v);
 }
