@@ -1,12 +1,19 @@
+#[derive(Debug)]
+struct ToyVec<T> {
+    elements: Box<[T]>,
+    len: usize,
+}
+
+impl<T: Default> ToyVec<T> {
+    pub fn new() -> Self {
+        Self {
+            elements: vec![].into_boxed_slice(),
+            len: 0,
+        }
+    }
+}
+
 fn main() {
-    let mut a = vec![1, 2, 3];
-    println!("{:?}", a); // [1, 2, 3]
-
-    let b = vec![4, 5, 6];
-    println!("{:?}", b); // [4, 5, 6]
-
-    let c = std::mem::replace(&mut a, b);
-    println!("{:?}", c); // [1, 2, 3]
-
-    println!("{:?}", a); // [4, 5, 6]
+    let v: ToyVec<i32> = ToyVec::new();
+    println!("{:?}", v);
 }
