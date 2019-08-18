@@ -36,10 +36,7 @@ impl<T: Default> ToyVec<T> {
     }
 
     // fn get_or<'a>(&'a mut self, index: usize, default: &'a T) -> &'a T {
-    //     match self.get(index) {
-    //         Some(v) => v,
-    //         None => default,
-    //     }
+    //     self.get(index).unwrap_or(default)
     // }
 
     // fn pop(&mut self) -> Option<T> {
