@@ -1,17 +1,17 @@
 #[derive(Debug)]
-struct ToyVec<T> {
+pub struct ToyVec<T> {
     elements: Box<[T]>,
     len: usize, // ベクタの長さ (現在の要素数)
 }
 
 impl<T: Default> ToyVec<T> {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self::with_capacity(0)
     }
 
     // 第1引数が &mut self なので ToyVec 構造体の内容を変更することがわかる
     // 第2引数が T 型なので所有権がこのメソッドへムーブすることがわかる
-    fn push(&mut self, element: T) {
+    pub fn push(&mut self, element: T) {
         // 要素を追加するスペースがないなら
         if self.len == self.capacity() {
             // もっと大きい elements を確保して既存の要素を引っ越す
@@ -27,7 +27,7 @@ impl<T: Default> ToyVec<T> {
     // 第1引数が &self なので ToyVec 構造体の内容は変更されないことがわかる
     // 第2引数は usize なので値がコピーされる
     // Option<&T> を返すため self が所有する値の不変の参照を返すことがわかる
-    fn get(&self, index: usize) -> Option<&T> {
+    pub fn get(&self, index: usize) -> Option<&T> {
         if index < self.len {
             Some(&self.elements[index])
         } else {
@@ -35,24 +35,17 @@ impl<T: Default> ToyVec<T> {
         }
     }
 
-    // fn get_or<'a>(&'a mut self, index: usize, default: &'a T) -> &'a T {
-    //     self.get(index).unwrap_or(default)
-    // }
+    pub fn get_or<'a>(&'a mut self, index: usize, default: &'a T) -> &'a T {
+        self.get(index).unwrap_or(default)
+    }
 
     // 戻り値が参照でないため所有権ごと返すことがわかる
-    fn pop(&mut self) -> Option<T> {
+    pub fn pop(&mut self) -> Option<T> {
         if self.len == 0 {
             None
         } else {
             self.len -= 1;
-
-            // 単に `let elem = self.elements[self.len];` としてもコンパイルエラーになる。
-            // なぜかというと、`&mut self` のような借用経由ではそれが所有する値の所有権を奪えないから。
-            //
-            // 所有権を奪うのではなく、所有権を交換する、つまり別の値と交換することならできる。
-            // 一般にサイズが可変の型のデフォルト値はメモリ使用量が最小になるよう考慮されている。
             let elem = std::mem::replace(&mut self.elements[self.len], Default::default());
-
             Some(elem)
         }
     }
@@ -79,6 +72,7 @@ impl<T: Default> ToyVec<T> {
             let new_elements = Self::allocate_in_heap(self.capacity() * 2);
             // 既存の全要素を
             let old_elements = std::mem::replace(&mut self.elements, new_elements);
+            // into_iter() で各要素の所有権をとるイテレータを作成している
             for (i, element) in old_elements.into_vec().into_iter().enumerate() {
                 // self.elements にセットする。
                 self.elements[i] = element;
@@ -90,25 +84,3 @@ impl<T: Default> ToyVec<T> {
         self.elements.len()
     }
 }
-
-// fn main() {
-//     let mut v = ToyVec::new();
-//
-//     v.push("Java Finch".to_string()); // 桜文鳥
-//     v.push("Budgerigar".to_string()); // セキセイインコ
-//
-//     // この時点では、スタック領域に v と e のためのスペースが用意されている。
-//     // v は ToyVec の構造体が格納されていて、e はまだ初期化されていない。
-//     //
-//     // スタック領域では ToyVec<String> の構造体が 3 行占めていて、
-//     //
-//     // - 上 2 行が Box<[String]> 型の elements フィールド
-//     //     - スライスを実現するデータ構造
-//     //     - 以下からなるファットポインタ (ファットポインタとは、データへのポインタといくつかの追加情報を含む構造体のこと)
-//     //         - スライスの先頭要素を指すポインタ
-//     //         - スライスの要素数
-//     // - 下 1 行が len フィールド
-//     //     - ベクタの要素数で、この時点では 2 になっている。
-//     let e = v.get(1);
-//     assert_eq!(e, Some(&"Budgerigar".to_string()));
-// }
