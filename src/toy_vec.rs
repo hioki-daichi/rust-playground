@@ -24,6 +24,16 @@ impl<'vec, T> Iterator for Iter<'vec, T> {
     }
 }
 
+impl<'vec, T: Default> IntoIterator for &'vec ToyVec<T> {
+    type Item = &'vec T;
+
+    type IntoIter = Iter<'vec, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
 impl<T: Default> ToyVec<T> {
     pub fn iter<'vec>(&'vec self) -> Iter<'vec, T> {
         Iter {

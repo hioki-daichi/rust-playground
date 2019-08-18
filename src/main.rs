@@ -17,4 +17,11 @@ fn main() {
     assert_eq!(iter.next(), Some(&"Java Finch".to_string()));
 
     v.push("Canary".to_string());
+
+    for msg in &v {
+        println!("{}", msg);
+        // Java Finch
+        // Budgerigar
+        // Canary
+    }
 }
