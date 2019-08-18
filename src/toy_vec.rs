@@ -39,15 +39,23 @@ impl<T: Default> ToyVec<T> {
     //     self.get(index).unwrap_or(default)
     // }
 
-    // fn pop(&mut self) -> Option<T> {
-    //     if self.len == 0 {
-    //         None
-    //     } else {
-    //         self.len -= 1;
-    //         let elem = std::mem::replace(&mut self.elements[self.len], Default::default());
-    //         Some(elem)
-    //     }
-    // }
+    // 戻り値が参照でないため所有権ごと返すことがわかる
+    fn pop(&mut self) -> Option<T> {
+        if self.len == 0 {
+            None
+        } else {
+            self.len -= 1;
+
+            // 単に `let elem = self.elements[self.len];` としてもコンパイルエラーになる。
+            // なぜかというと、`&mut self` のような借用経由ではそれが所有する値の所有権を奪えないから。
+            //
+            // 所有権を奪うのではなく、所有権を交換する、つまり別の値と交換することならできる。
+            // 一般にサイズが可変の型のデフォルト値はメモリ使用量が最小になるよう考慮されている。
+            let elem = std::mem::replace(&mut self.elements[self.len], Default::default());
+
+            Some(elem)
+        }
+    }
 
     fn with_capacity(n: usize) -> Self {
         Self {
