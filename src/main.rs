@@ -1,35 +1,54 @@
 use std::cell::RefCell;
-
-struct A {
-    s: RefCell<String>,
-}
+use std::collections::HashSet;
 
 fn main() {
-    let a = A {
-        s: RefCell::new("Daichi".to_string()),
-    };
+    // 標準ライブラリの thread_local! マクロで TLS に変数 SS を作成している
+    thread_local!(
+        static SS: RefCell<HashSet<&'static str>> = {
+            // >> let ss: HashSet<&str> = ["foo", "bar"].iter().cloned().collect();
+            // >> ss
+            // {"bar", "foo"}
+            let ss = ["foo", "bar"].iter().cloned().collect();
+            RefCell::new(ss)
+        }
+    );
 
-    let ra = &a;
+    // TLS に置いた値にアクセスするには with を使う。
+    SS.with(|ss| {
+        // ss の型は &RefCell<HashSet<&'static str>>
 
-    // 可変の参照を取っている
-    ra.s.borrow_mut().push_str(" Hioki");
+        assert!(ss.borrow().contains("foo"));
+        assert!(ss.borrow().contains("bar"));
 
-    assert_eq!(*ra.s.borrow_mut(), "Daichi Hioki".to_string());
+        // "baz" を追加する。
+        assert!(!ss.borrow().contains("baz"));
+        ss.borrow_mut().insert("baz");
+        assert!(ss.borrow().contains("baz"));
+    });
 
-    {
-        // 不変の参照を取っている
-        let ras = a.s.borrow();
+    // 別スレッドを起動する。
+    std::thread::spawn(|| {
+        SS.with(|ss| {
+            assert!(ss.borrow().contains("foo"));
+            assert!(ss.borrow().contains("bar"));
 
-        assert_eq!(*ras, "Daichi Hioki".to_string());
+            // main スレッドで追加した "baz" はこちらのスレッドには存在しない。
+            assert!(!ss.borrow().contains("baz"));
 
-        // さらに a.s.borrow_mut(); で可変の参照を取ろうとすると panic する。
-        // thread 'main' panicked at 'already borrowed: BorrowMutError', src/libcore/result.rs:1084:5
-        //
-        // RefCell は実行時に貸し出しの数をカウントして借用規則に従っているかをチェックしてくれる。
+            // "qux" を追加する。
+            assert!(!ss.borrow().contains("qux"));
+            ss.borrow_mut().insert("qux");
+            assert!(ss.borrow().contains("qux"));
+        });
+    })
+    .join()
+    .expect("Thread error");
 
-        // try_borrow_mut() なら借用の成否が Result で返る
-        assert!(a.s.try_borrow_mut().is_err())
-    } // ras はここでスコープを抜ける
-
-    assert!(a.s.try_borrow_mut().is_ok())
+    // 再び main スレッド
+    SS.with(|ss| {
+        // 以前 main スレッドで追加した "baz" がいる。
+        assert!(ss.borrow().contains("baz"));
+        // 別スレッドで追加した "qux" はいない。
+        assert!(!ss.borrow().contains("qux"));
+    })
 }
