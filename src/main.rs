@@ -1,59 +1,48 @@
+use lazy_static::lazy_static;
 use std::collections::HashSet;
 use std::error::Error;
-use std::sync::{Arc, RwLock};
+use std::sync::RwLock;
 
-// read() や write() で発生する PoisonError を String に変換する便利な関数
-fn stringify(a: impl ToString) -> String {
-    a.to_string()
+// Lazy Static クレートの lazy_static! マクロを使って static 変数 WORDS を定義している。
+// Rust の素の static 変数ではコンパイル時の定数でしか初期化できず関数呼び出しなどはできない。
+// Rust の素の static 変数同様デストラクタ (drop メソッド) を呼ばない仕様になっている。
+lazy_static! {
+    pub static ref WORDS: RwLock<HashSet<&'static str>> = {
+        let words = ["foo", "bar"].iter().cloned().collect();
+        RwLock::new(words)
+    };
+}
+
+fn stringify(x: impl ToString) -> String {
+    x.to_string()
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let hs: HashSet<&'static str> = ["foo", "bar"].iter().cloned().collect();
-
-    // RwLock で包むことで HashSet を可変にして、
-    // Arc で包むことでスレッド間で共有できるようにしている
-    let hs: Arc<RwLock<HashSet<&'static str>>> = Arc::new(RwLock::new(hs));
-
     {
-        // read ロックを取得している。
-        //
-        // Arc は内包するデータ型 (ここでは RwLock) への Deref を実装しているため、
-        // メソッドレシーバの型強制により RwLock のメソッドを直に呼べる。
-        //
-        // ロックが取得できない時は取得できるまで現在のスレッドがブロックされる。
-        //
-        // ロックが取得できると Ok(ガード) を返すため ? 演算子でアンラップしている。
-        //
-        let hs2 = hs.read().map_err(stringify)?;
+        let words = WORDS.read()?; // read ロックを取得している。
 
-        assert!(hs2.contains("foo"));
-        assert!(hs2.contains("bar"));
-    } // hs2 がスコープをはずれロックが解除される
+        assert!(words.contains("foo"));
+        assert!(words.contains("bar"));
+    } // words がスコープを外れるため read ロックが解除される。
 
-    // write ロックを取得している。
-    // Ok(ガード) を ? 演算子でアンラップした後、メソッドレシーバの型強制によって
-    // ガードから HashSet<&'static str> の insert() を呼んでいる。
-    hs.write().map_err(stringify)?.insert("baz");
+    // read ロックが解除されたため write ロックを取得できる。
+    // main スレッドで "baz" を追加している。
+    WORDS.write()?.insert("baz");
 
-    // 複製した Arc ポインタを spawn で起動した別スレッドに渡すことで HashSet を共有している
-    let hs3: Arc<RwLock<HashSet<&'static str>>> = Arc::clone(&hs);
-    std::thread::spawn(move || {
-        let _guard = hs3.write();
-        panic!();
+    // 別スレッドで "qux" を追加している。
+    std::thread::spawn(|| {
+        WORDS
+            .write()
+            .map(|mut words| words.insert("qux"))
+            .map_err(stringify)
     })
     .join()
-    .expect_err(""); // expect_err は Err を期待するため Ok の場合に panic する。
+    .expect("Thread error")?;
 
-    let _hs4 = hs.read().expect("Cannot acquire read lock");
-    // thread '<unnamed>' panicked at 'explicit panic', src/main.rs:42:9
-    // note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace.
-    // thread 'main' panicked at 'Cannot acquire read lock: "PoisonError { inner: .. }"', src/libcore/result.rs:1084:5
-
-    // main スレッドで追加した要素は見えるし、
-    assert!(hs.read().map_err(stringify)?.contains("baz"));
-
-    // 別スレッドで追加した要素も見える。
-    assert!(hs.read().map_err(stringify)?.contains("qux"));
+    // main スレッドで追加した "baz" も見えるし、
+    assert!(WORDS.read()?.contains("baz"));
+    // 別スレッドで追加した "qux" も見える。
+    assert!(WORDS.read()?.contains("qux"));
 
     Ok(())
 }
