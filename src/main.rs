@@ -1,48 +1,63 @@
-use lazy_static::lazy_static;
-use std::collections::HashSet;
-use std::error::Error;
-use std::sync::RwLock;
+fn apply_fn<F>(f: &F, ch: char)
+where
+    F: Fn(char) -> bool, // ここでの F は Fn を実装している
+{
+    assert!(f(ch));
+}
 
-// Lazy Static クレートの lazy_static! マクロを使って static 変数 WORDS を定義している。
-// Rust の素の static 変数ではコンパイル時の定数でしか初期化できず関数呼び出しなどはできない。
-// Rust の素の static 変数同様デストラクタ (drop メソッド) を呼ばない仕様になっている。
-lazy_static! {
-    pub static ref WORDS: RwLock<HashSet<&'static str>> = {
-        let words = ["foo", "bar"].iter().cloned().collect();
-        RwLock::new(words)
+fn apply_fn_mut<F>(f: &mut F, ch: char)
+where
+    F: FnMut(char) -> bool, // ここでの F は FnMut を実装している
+{
+    assert!(f(ch));
+}
+
+fn apply_fn_once<F>(f: F, ch: char)
+where
+    F: FnOnce(char) -> bool, // ここでの F は FnOnce を実装している
+{
+    assert!(f(ch));
+}
+
+fn main() {
+    let s1: &str = "read-only";
+
+    // 環境から読むだけのクロージャ。
+    // find(&self) は &str を読むだけ。
+    let mut lookup = |ch| s1.find(ch).is_some();
+
+    apply_fn(&lookup, 'r');
+    apply_fn_mut(&mut lookup, 'r');
+    apply_fn_once(lookup, 'r');
+
+    // 環境に取り込まれた文字列 (&str 型) は変更されていない。
+    assert_eq!(s1, "read-only");
+
+    let mut s2: String = "append".to_string();
+    let mut modify = |ch| {
+        s2.push(ch); // push(&mut self, char) は String を可変の参照経由で変更する
+        true
     };
-}
 
-fn stringify(x: impl ToString) -> String {
-    x.to_string()
-}
+    // コンパイルエラー
+    // apply_fn(&modify, 'e'); // expected a closure that implements the `Fn` trait, but this closure only implements `FnMut`    the requirement to implement `Fn` derives from here
 
-fn main() -> Result<(), Box<dyn Error>> {
-    {
-        let words = WORDS.read()?; // read ロックを取得している。
+    apply_fn_mut(&mut modify, '!');
+    apply_fn_once(modify, '?');
 
-        assert!(words.contains("foo"));
-        assert!(words.contains("bar"));
-    } // words がスコープを外れるため read ロックが解除される。
+    assert_eq!(s2, "append!?");
 
-    // read ロックが解除されたため write ロックを取得できる。
-    // main スレッドで "baz" を追加している。
-    WORDS.write()?.insert("baz");
+    let s3 = "be converted".to_string();
+    let mut consume = |ch| {
+        let bytes = s3.into_bytes();
+        bytes.contains(&(ch as u8))
+    };
 
-    // 別スレッドで "qux" を追加している。
-    std::thread::spawn(|| {
-        WORDS
-            .write()
-            .map(|mut words| words.insert("qux"))
-            .map_err(stringify)
-    })
-    .join()
-    .expect("Thread error")?;
+    // apply_fn(&consume, 'b'); // expected a closure that implements the `Fn` trait, but this closure only implements `FnOnce`    the requirement to implement `Fn` derives from here
+    // apply_fn_mut(&mut consume, 'c'); // expected a closure that implements the `FnMut` trait, but this closure only implements `FnOnce`    the requirement to implement `FnMut` derives from here
+    apply_fn_once(consume, 'd');
 
-    // main スレッドで追加した "baz" も見えるし、
-    assert!(WORDS.read()?.contains("baz"));
-    // 別スレッドで追加した "qux" も見える。
-    assert!(WORDS.read()?.contains("qux"));
-
-    Ok(())
+    // コンパイルエラー
+    // s3 はムーブ済み
+    // assert_eq!(s3, "error"); // borrow of moved value: `s3`    value borrowed here after move
 }
