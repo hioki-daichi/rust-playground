@@ -37,9 +37,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // 複製した Arc ポインタを spawn で起動した別スレッドに渡すことで HashSet を共有している
     let hs3: Arc<RwLock<HashSet<&'static str>>> = Arc::clone(&hs);
-    std::thread::spawn(move || hs3.write().map(|mut d| d.insert("qux")).map_err(stringify))
-        .join() // join() はスレッドの終了を待つ
-        .expect("Thread error")?;
+    std::thread::spawn(move || {
+        let _guard = hs3.write();
+        panic!();
+    })
+    .join()
+    .expect_err(""); // expect_err は Err を期待するため Ok の場合に panic する。
+
+    let _hs4 = hs.read().expect("Cannot acquire read lock");
+    // thread '<unnamed>' panicked at 'explicit panic', src/main.rs:42:9
+    // note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace.
+    // thread 'main' panicked at 'Cannot acquire read lock: "PoisonError { inner: .. }"', src/libcore/result.rs:1084:5
 
     // main スレッドで追加した要素は見えるし、
     assert!(hs.read().map_err(stringify)?.contains("baz"));
