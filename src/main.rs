@@ -41,8 +41,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         .join() // join() はスレッドの終了を待つ
         .expect("Thread error")?;
 
-    // このスレッドで別スレッドで追加した要素が見える。
+    // main スレッドで追加した要素は見えるし、
     assert!(hs.read().map_err(stringify)?.contains("baz"));
+
+    // 別スレッドで追加した要素も見える。
     assert!(hs.read().map_err(stringify)?.contains("qux"));
 
     Ok(())
