@@ -37,6 +37,9 @@ fn main() {
         String::from(" ").repeat(offset * 3),
         String::from("‾").repeat(11)
     );
+
+    // println!("binary: {: >51}", format!("{:032b}", sum));
+
     println!(
         "  {:02X?}: {:08b}\n& 7F: {:08b}\n‒‒‒‒‒‒‒‒‒‒‒‒‒‒\n  {:02X?}: {:08b}\n",
         value[offset + 0],
@@ -45,7 +48,6 @@ fn main() {
         a1,
         a1
     );
-
     println!("  {:02X?}: {:08b} --(<< 24)-> {:032b}", a1, a1, a2);
     println!("  {:02X?}: {:08b} --(<< 16)-> {:032b}", b1, b1, b2);
     println!("  {:02X?}: {:08b} --(<<  8)-> {:032b}", c1, c1, c2);
@@ -53,6 +55,7 @@ fn main() {
     println!("{}", String::from("‒").repeat(59));
     println!("binary: {: >51}", format!("{:032b}", sum));
     println!("decimal: {: >50}", format!("{}", sum));
+    println!("                                                     ~~~~~~");
     println!("");
     println!("totp: {: >53}", format!("{:06}", sum % 1000_000));
 }
