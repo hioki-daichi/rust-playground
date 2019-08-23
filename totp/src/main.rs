@@ -38,7 +38,7 @@ fn main() {
         String::from("‾").repeat(11)
     );
     println!(
-        "  {:02X?}: {:08b}\n& 7F: {:08b}\n--------------\n  {:02X?}: {:08b}\n",
+        "  {:02X?}: {:08b}\n& 7F: {:08b}\n‒‒‒‒‒‒‒‒‒‒‒‒‒‒\n  {:02X?}: {:08b}\n",
         value[offset + 0],
         value[offset + 0],
         0x7f,
@@ -50,11 +50,9 @@ fn main() {
     println!("  {:02X?}: {:08b} --(<< 16)-> {:032b}", b1, b1, b2);
     println!("  {:02X?}: {:08b} --(<<  8)-> {:032b}", c1, c1, c2);
     println!("+ {:02X?}: {:08b} --(<<  0)-> {:032b}", d1, d1, d2);
-    println!("-----------------------------------------------------------");
-    println!("                           {:032b}", sum);
-    println!("{: >59}", format!("decimal: {}", sum));
-    println!(
-        "{: >59}",
-        format!("trailing 6 digits: {:06}", sum % 1000_000)
-    );
+    println!("{}", String::from("‒").repeat(59));
+    println!("binary: {: >51}", format!("{:032b}", sum));
+    println!("decimal: {: >50}", format!("{}", sum));
+    println!("");
+    println!("totp: {: >53}", format!("{:06}", sum % 1000_000));
 }
