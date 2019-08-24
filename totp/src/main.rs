@@ -12,16 +12,16 @@ fn main() {
     let tag = ring::hmac::sign(&ring::hmac::Key::new(alg, &secret), &msg);
     let mac_value = tag.as_ref();
     let offset = (mac_value[19] & 0xf) as usize;
-    let a0 = mac_value[offset + 0];
-    let a1 = a0 & 0x7f;
+    let a1 = mac_value[offset + 0];
     let b1 = mac_value[offset + 1];
     let c1 = mac_value[offset + 2];
     let d1 = mac_value[offset + 3];
-    let a2 = (a1 as u64) << 24;
-    let b2 = (b1 as u64) << 16;
-    let c2 = (c1 as u64) << 8;
-    let d2 = d1 as u64;
-    let sum = a2 + b2 + c2 + d2;
+    let a2 = a1 & 0x7f;
+    let a3 = (a2 as u32) << 24;
+    let b3 = (b1 as u32) << 16;
+    let c3 = (c1 as u32) << 8;
+    let d3 = d1 as u32;
+    let sum = a3 + b3 + c3 + d3;
     let totp = format!("{:06}", sum % 1000_000);
 
     println!("Arg: {}\n", arg);
@@ -66,15 +66,15 @@ fn main() {
     );
     println!(
         "  0x{:02X?}: {:08b}\n& 0x7F: {:08b}\n‒‒‒‒‒‒‒‒‒‒‒‒‒‒‒‒\n  0x{:02X?}: {:08b}\n",
-        a0, a0, 0x7f, a1, a1
+        a1, a1, 0x7f, a2, a2
     );
-    println!("  0x{:02X?}: {:08b} --(<< 24)-> {:032b}", a1, a1, a2);
-    println!("  0x{:02X?}: {:08b} --(<< 16)-> {:032b}", b1, b1, b2);
-    println!("  0x{:02X?}: {:08b} --(<<  8)-> {:032b}", c1, c1, c2);
-    println!("+ 0x{:02X?}: {:08b} --(<<  0)-> {:032b}", d1, d1, d2);
-    println!("{}", String::from("‒").repeat(61));
-    println!("binary: {: >53}", format!("{:032b}", sum));
-    println!("decimal: {: >52}", format!("{}", sum));
-    println!("                                                       ~~~~~~\n");
-    println!("totp: {: >55}", totp);
+    println!("  0x{:02X?}: {:08b} ‒‒(<< 24)‒‒> {:032b}", a2, a2, a3);
+    println!("  0x{:02X?}: {:08b} ‒‒(<< 16)‒‒> {:032b}", b1, b1, b3);
+    println!("  0x{:02X?}: {:08b} ‒‒(<<  8)‒‒> {:032b}", c1, c1, c3);
+    println!("+ 0x{:02X?}: {:08b} ‒‒(<<  0)‒‒> {:032b}", d1, d1, d3);
+    println!("{}", String::from("‒").repeat(62));
+    println!("binary: {: >54}", format!("{:032b}", sum));
+    println!("decimal: {: >53}", format!("{}", sum));
+    println!("                                                        ~~~~~~\n");
+    println!("totp: {: >56}", totp);
 }
