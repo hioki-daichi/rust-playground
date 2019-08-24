@@ -1,15 +1,11 @@
-fn f<T: std::borrow::Borrow<str>>(s: T) {
-    assert_eq!("Hello", s.borrow());
-}
+use std::borrow::Borrow;
 
-fn g<T: AsRef<str>>(s: T) {
-    assert_eq!("Hello", s.as_ref());
+fn f<T: Borrow<str> + ?Sized>(a: &T) {
+    let s: &str = a.borrow();
+    assert_eq!("Hello", s);
 }
 
 fn main() {
     f("Hello");
-    f("Hello".to_string());
-
-    g("Hello");
-    g("Hello".to_string());
+    f(&"Hello".to_string());
 }
