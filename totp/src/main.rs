@@ -1,6 +1,8 @@
 fn main() {
-    let arg = "YOIZZNEW62LZXIC4A7WFRFB5WYEMCDYCE4HBM6E5INKBHA2F5OHJAEVGWWS3A7TN";
-    let secret = base32::decode(base32::Alphabet::RFC4648 { padding: false }, arg).unwrap();
+    let secret: Vec<u8> = vec![
+        195, 145, 156, 180, 150, 246, 151, 155, 160, 92, 7, 236, 88, 148, 61, 182, 8, 193, 15, 2,
+        39, 14, 22, 120, 157, 67, 84, 19, 131, 69, 235, 142, 144, 18, 166, 181, 165, 176, 126, 109,
+    ];
     let unixtime = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
@@ -24,7 +26,6 @@ fn main() {
     let sum = a3 + b3 + c3 + d3;
     let totp = format!("{:06}", sum % 1000_000);
 
-    println!("Arg: {}\n", arg);
     println!(
         "Key: |{}|",
         secret
@@ -34,7 +35,7 @@ fn main() {
             .join("|")
     );
     println!(
-        "Msg: |{}|\n     (Unixtime: {} ‒‒(/{})‒‒> {})\n",
+        "Msg: |{}|\n     (Unixtime: {} --(/{})--> {})\n",
         &msg.iter()
             .map(|b| format!("{:02X}", b))
             .collect::<Vec<_>>()
@@ -52,27 +53,27 @@ fn main() {
             .join("|")
     );
     println!(
-        "     {} {}{}**",
+        "     {} {}{}**\n",
         String::from(" ").repeat(offset * 3),
-        String::from("‾").repeat(11),
+        String::from("-").repeat(11),
         String::from(" ").repeat(46 - (offset * 3)),
     );
     println!(
-        "0x{:02X?} ‒‒(binary)‒‒‒> {:08b}\n     ‒‒(& 0x0F)‒‒‒> {:08b}\n     ‒‒(decimal)‒‒> {}\n",
+        "0x{:02X?} --(binary)---> {:08b}\n     --(& 0x0F)---> {:08b}\n     --(decimal)--> {}\n",
         mac_value[19],
         mac_value[19],
         mac_value[19] & 0xf,
         offset,
     );
     println!(
-        "  0x{:02X?}: {:08b}\n& 0x7F: {:08b}\n‒‒‒‒‒‒‒‒‒‒‒‒‒‒‒‒\n  0x{:02X?}: {:08b}\n",
+        "  0x{:02X?}: {:08b}\n& 0x7F: {:08b}\n----------------\n  0x{:02X?}: {:08b}\n",
         a1, a1, 0x7f, a2, a2
     );
-    println!("  0x{:02X?}: {:08b} ‒‒(<< 24)‒‒> {:032b}", a2, a2, a3);
-    println!("  0x{:02X?}: {:08b} ‒‒(<< 16)‒‒> {:032b}", b1, b1, b3);
-    println!("  0x{:02X?}: {:08b} ‒‒(<<  8)‒‒> {:032b}", c1, c1, c3);
-    println!("+ 0x{:02X?}: {:08b} ‒‒(<<  0)‒‒> {:032b}", d1, d1, d3);
-    println!("{}", String::from("‒").repeat(62));
+    println!("  0x{:02X?}: {:08b} --(<< 24)--> {:032b}", a2, a2, a3);
+    println!("  0x{:02X?}: {:08b} --(<< 16)--> {:032b}", b1, b1, b3);
+    println!("  0x{:02X?}: {:08b} --(<<  8)--> {:032b}", c1, c1, c3);
+    println!("+ 0x{:02X?}: {:08b} --(<<  0)--> {:032b}", d1, d1, d3);
+    println!("{}", String::from("-").repeat(62));
     println!("binary: {: >54}", format!("{:032b}", sum));
     println!("decimal: {: >53}", format!("{}", sum));
     println!("                                                        ~~~~~~\n");
