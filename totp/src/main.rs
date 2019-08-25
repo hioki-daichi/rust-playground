@@ -1,8 +1,10 @@
 fn main() {
-    let secret: Vec<u8> = vec![
-        195, 145, 156, 180, 150, 246, 151, 155, 160, 92, 7, 236, 88, 148, 61, 182, 8, 193, 15, 2,
-        39, 14, 22, 120, 157, 67, 84, 19, 131, 69, 235, 142, 144, 18, 166, 181, 165, 176, 126, 109,
-    ];
+    let base32_encoded_string = "YOIZZNEW62LZXIC4A7WFRFB5WYEMCDYCE4HBM6E5INKBHA2F5OHJAEVGWWS3A7TN";
+    let secret = base32::decode(
+        base32::Alphabet::RFC4648 { padding: false },
+        base32_encoded_string,
+    )
+    .unwrap();
     let unixtime = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
