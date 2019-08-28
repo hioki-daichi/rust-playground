@@ -52,12 +52,7 @@ impl Coordinates for (f64, f64) {
     }
 }
 
-fn main() {
-    let point = (1.0, 1.0);
-    let c = point.to_cartesian();
-    println!("{:?}", c.x);
-    println!("{:?}", c.y);
-    let p = PolarCoord::from_cartesian(c);
-    println!("{:?}", p.r);
-    println!("{:?}", p.theta);
+fn print_point<P>(point: P) {
+    let p = point.to_cartesian();
+    println!("({} {})", p.x, p.y);
 }
