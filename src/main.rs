@@ -4,14 +4,14 @@ struct CartesianCoord {
     y: f64,
 }
 
+struct Matrix([[f64; 2]; 2]);
+
 trait Coordinates {
     fn to_cartesian(self) -> CartesianCoord;
 }
 
-#[allow(dead_code)]
-fn print_point<P: Coordinates>(point: P) {
-    let cart = point.to_cartesian();
-    println!("({} {})", cart.x, cart.y);
+trait LinearTransform {
+    fn transform(self, matrix: &Matrix) -> Self;
 }
 
 impl Coordinates for CartesianCoord {
@@ -29,43 +29,23 @@ impl Coordinates for (f64, f64) {
     }
 }
 
-struct Matrix([[f64; 2]; 2]);
-
-// Coordinates トレイトを継承している。
-// 座標に対して線形変換を定義している。
-trait LinearTransform: Coordinates {
-    fn transform(self, matrix: &Matrix) -> Self;
-
-    // デフォルト実装を持てる。
-    fn rotate(self, theta: f64) -> Self
-    where
-        Self: Sized,
-    {
-        self.transform(&Matrix([
-            [theta.cos(), -theta.sin()],
-            [theta.sin(), theta.cos()],
-        ]))
-    }
-}
-
-// CartesianCoord に LinearTransform を実装する
 impl LinearTransform for CartesianCoord {
-    fn transform(mut self, matrix: &Matrix) -> Self {
-        let x = self.x;
-        let y = self.y;
+    fn transform(self, matrix: &Matrix) -> Self {
+        let mut cart = self.to_cartesian();
+        println!("{:?}", cart);
+        let x = cart.x;
+        let y = cart.y;
         let m = matrix.0;
 
-        self.x = m[0][0] * x + m[0][1] * y;
-        self.y = m[1][0] * x + m[1][1] * y;
-        self
+        cart.x = m[0][0] * x + m[0][1] * y;
+        cart.y = m[1][0] * x + m[1][1] * y;
+        cart
     }
 }
 
 fn main() {
-    println!("{:?}", (1.0, 0.0).to_cartesian()); // CartesianCoord { x: 1.0, y: 0.0 }
+    let c: CartesianCoord = (1.0, 0.0).to_cartesian();
+    let m: Matrix = Matrix([[2.0, 3.0], [4.0, 5.0]]);
 
-    println!(
-        "{:?}",
-        (1.0, 0.0).to_cartesian().rotate(std::f64::consts::PI)
-    ); // CartesianCoord { x: -1.0, y: 0.00000000000000012246467991473532 }
+    println!("{:?}", c.transform(&m)); // CartesianCoord { x: 2.0, y: 4.0 }
 }
