@@ -4,39 +4,19 @@ struct CartesianCoord {
     y: f64,
 }
 
-struct PolarCoord {
-    r: f64,
-    theta: f64,
-}
-
 trait Coordinates {
     fn to_cartesian(self) -> CartesianCoord;
-    fn from_cartesian(cart: CartesianCoord) -> Self;
+}
+
+#[allow(dead_code)]
+fn print_point<P: Coordinates>(point: P) {
+    let cart = point.to_cartesian();
+    println!("({} {})", cart.x, cart.y);
 }
 
 impl Coordinates for CartesianCoord {
     fn to_cartesian(self) -> CartesianCoord {
         self
-    }
-
-    fn from_cartesian(cart: CartesianCoord) -> Self {
-        cart
-    }
-}
-
-impl Coordinates for PolarCoord {
-    fn to_cartesian(self) -> CartesianCoord {
-        CartesianCoord {
-            x: self.r * self.theta.cos(),
-            y: self.r * self.theta.sin(),
-        }
-    }
-
-    fn from_cartesian(cart: CartesianCoord) -> Self {
-        PolarCoord {
-            r: (cart.x * cart.x + cart.y * cart.y).sqrt(),
-            theta: (cart.y / cart.x).atan(),
-        }
     }
 }
 
@@ -47,17 +27,16 @@ impl Coordinates for (f64, f64) {
             y: self.1,
         }
     }
-
-    fn from_cartesian(cart: CartesianCoord) -> Self {
-        (cart.x, cart.y)
-    }
 }
 
 struct Matrix([[f64; 2]; 2]);
 
+// Coordinates トレイトを継承している。
+// 座標に対して線形変換を定義している。
 trait LinearTransform: Coordinates {
     fn transform(self, matrix: &Matrix) -> Self;
 
+    // デフォルト実装を持てる。
     fn rotate(self, theta: f64) -> Self
     where
         Self: Sized,
@@ -69,6 +48,7 @@ trait LinearTransform: Coordinates {
     }
 }
 
+// CartesianCoord に LinearTransform を実装する
 impl LinearTransform for CartesianCoord {
     fn transform(mut self, matrix: &Matrix) -> Self {
         let x = self.x;
@@ -81,15 +61,11 @@ impl LinearTransform for CartesianCoord {
     }
 }
 
-fn print_point<P: Coordinates>(point: P) {
-    let cart = point.to_cartesian();
-    println!("({} {})", cart.x, cart.y);
-}
-
 fn main() {
-    let p = (1.0, 0.0).to_cartesian();
+    println!("{:?}", (1.0, 0.0).to_cartesian()); // CartesianCoord { x: 1.0, y: 0.0 }
 
-    // print_point(p); // (1 0)
-
-    print_point(p.rotate(std::f64::consts::PI)); // (-1 0.00000000000000012246467991473532)
+    println!(
+        "{:?}",
+        (1.0, 0.0).to_cartesian().rotate(std::f64::consts::PI)
+    ); // CartesianCoord { x: -1.0, y: 0.00000000000000012246467991473532 }
 }
