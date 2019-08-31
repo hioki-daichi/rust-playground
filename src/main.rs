@@ -1,6 +1,7 @@
-use std::string::ToString;
+use std::fmt::Display;
 
-// 実際にはもう少し複雑な名前
-fn stringify_i32(t: i32) -> String {
-    <i32 as ToString>::to_string(t)
+fn main() {
+    let mut v: Vec<&dyn Display> = vec![];
+    v.push(&true);
+    v.push(&1i32);
 }
