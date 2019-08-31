@@ -1,21 +1,26 @@
-trait Foo<T> {
-    fn new(t: T) -> Self;
-}
-fn some_fn_foo1<S, T: Foo<S>>(t: T) {}
-fn some_fn_foo2<S, T: Foo<u32>>(t: T) {}
+use std::ops::Add;
+use std::ops::AddAssign;
 
-struct Baz;
+#[derive(Debug)]
+struct MyInt(i64);
 
-impl Foo<i32> for Baz {
-    fn new(_t: i32) -> Self {
-        Baz {}
+impl Add<MyInt> for MyInt {
+    type Output = Self;
+    fn add(self, rhs: MyInt) -> Self::Output {
+        MyInt(self.0 + rhs.0)
     }
 }
 
-impl Foo<char> for Baz {
-    fn new(_t: char) -> Self {
-        Baz {}
+impl AddAssign for MyInt {
+    fn add_assign(&mut self, other: Self) {
+        self.0 += other.0;
     }
 }
 
-fn main() {}
+fn main() {
+    let one = MyInt(1);
+    let two = MyInt(2);
+    let mut i = one + two;
+    i += MyInt(3);
+    println!("{:?}", i); // MyInt(6)
+}
