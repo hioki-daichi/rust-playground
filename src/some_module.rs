@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, PartialOrd)]
 pub struct CartesianCoord {
     x: f64,
     y: f64,
