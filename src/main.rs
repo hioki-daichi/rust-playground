@@ -1,8 +1,13 @@
-fn to_n(n: i32) -> impl Iterator {
-    0..n
+struct Foo {}
+
+trait ATrait {
+    const AAA: u32;
+}
+
+impl ATrait for Foo {
+    const AAA: u32 = 2;
 }
 
 fn main() {
-    let a = to_n(3);
-    println!("{:?}", a);
+    println!("{}", Foo::AAA); // 2
 }
