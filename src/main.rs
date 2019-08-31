@@ -1,21 +1,24 @@
-trait As<T> {
-    fn cast(self) -> T;
+trait Overload {
+    fn call(&self) -> &'static str;
 }
 
-impl As<u64> for u8 {
-    fn cast(self) -> u64 {
-        self as u64
+impl Overload for i32 {
+    fn call(&self) -> &'static str {
+        "i32"
     }
 }
 
-impl As<u32> for u8 {
-    fn cast(self) -> u32 {
-        self as u32
+impl Overload for str {
+    fn call(&self) -> &'static str {
+        "str"
     }
 }
 
 fn main() {
-    let one_u32: u32 = 1.cast();
-    let one_u32: u64 = 1.cast();
-    let one_u32: i8 = 1.cast(); // the trait bound `{integer}: As<i8>` is not satisfied    the trait `As<i8>` is not implemented for `{integer}`
+    assert_eq!(1i32.call(), "i32");
+    assert_eq!("str".call(), "str");
+
+    // Rust のメソッド呼び出しはただの糖衣構文なので以下のようにも書ける。
+    assert_eq!(Overload::call(&1i32), "i32");
+    assert_eq!(Overload::call("str"), "str");
 }
