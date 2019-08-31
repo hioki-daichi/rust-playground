@@ -1,7 +1,8 @@
-use std::fmt::Display;
+fn to_n(n: i32) -> impl Iterator {
+    0..n
+}
 
 fn main() {
-    let mut v: Vec<&dyn Display> = vec![];
-    v.push(&true);
-    v.push(&1i32);
+    let a = to_n(3);
+    println!("{:?}", a);
 }
