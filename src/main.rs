@@ -1,18 +1,17 @@
-use std::ffi::OsStr;
-use std::fs::File;
-use std::io;
-use std::io::prelude::*;
-use std::path::Path;
+trait SomeTrait {
+    fn take_ref(&self);
+}
 
-fn hello_to_file(path: impl AsRef<Path>) -> io::Result<()> {
-    let mut buf = File::create(path.as_ref())?;
-    buf.write(b"hello")?;
-    Ok(())
+impl SomeTrait for str {
+    fn take_ref(&self) {}
 }
 
 fn main() {
-    hello_to_file("foo.txt").unwrap();
-    hello_to_file("bar.txt".to_string()).unwrap();
-    hello_to_file(OsStr::new("baz.txt")).unwrap();
-    hello_to_file(Path::new("qux.txt")).unwrap();
+    let s = "hoge";
+    s.take_ref();
+
+    // Box<str> に対しても呼べると本には書いてあったがコンパイルエラー
+    let box_s = Box::new(*s); // the size for values of type `str` cannot be known at compilation time    doesn't have a size known at compile-time    help: the trait `std::marker::Sized` is not implemented for `str`
+
+    box_s.take_ref();
 }
