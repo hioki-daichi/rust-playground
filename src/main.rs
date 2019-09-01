@@ -1,17 +1,10 @@
-trait SomeTrait {
-    fn take_ref(&self);
-}
+// 外部クレートの Struct: A をラップした Struct: AWrapper を定義する。
+struct AWrapper(A);
 
-impl SomeTrait for str {
-    fn take_ref(&self) {}
-}
+// AWrapper は自身で定義した型なのでトレイトを実装できる。
+impl A for AWrapper {}
 
 fn main() {
-    let s = "hoge";
-    s.take_ref();
-
-    // Box<str> に対しても呼べると本には書いてあったがコンパイルエラー
-    let box_s = Box::new(*s); // the size for values of type `str` cannot be known at compilation time    doesn't have a size known at compile-time    help: the trait `std::marker::Sized` is not implemented for `str`
-
-    box_s.take_ref();
+    // A トレイトのメソッドが呼べる。
+    AWrapper(A::new()).method();
 }
