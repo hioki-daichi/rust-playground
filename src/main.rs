@@ -1,16 +1,12 @@
-use std::fs::File;
-use std::io::prelude::*;
+use std::convert::From;
+use std::net::IpAddr;
 
-fn main() -> std::io::Result<()> {
-    let data = b"some bytes";
+fn main() {
+    assert_eq!(usize::from(true), 1);
+    assert_eq!(usize::from(false), 0);
 
-    let mut pos = 0;
-    let mut buffer = File::create("foo.txt")?;
+    let xs: [u8; 4] = [192, 168, 0, 1];
+    let addr: IpAddr = IpAddr::from(xs);
 
-    while pos < data.len() {
-        let buf = &data[pos..pos + 1];
-        let bytes_written = buffer.write(buf)?;
-        pos += bytes_written;
-    }
-    Ok(())
+    println!("{:?}", addr); // V4(192.168.0.1)
 }
