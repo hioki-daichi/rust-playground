@@ -1,13 +1,18 @@
-use std::convert::Into;
-fn foo(min: impl Into<Option<usize>>, max: impl Into<Option<usize>>) -> [usize; 2] {
-    let a = min.into().unwrap_or(1);
-    let b = max.into().unwrap_or(100);
-    [a, b]
+use std::ffi::OsStr;
+use std::fs::File;
+use std::io;
+use std::io::prelude::*;
+use std::path::Path;
+
+fn hello_to_file(path: impl AsRef<Path>) -> io::Result<()> {
+    let mut buf = File::create(path.as_ref())?;
+    buf.write(b"hello")?;
+    Ok(())
 }
 
 fn main() {
-    println!("{:?}", foo(30, 70)); // [30, 70]
-    println!("{:?}", foo(30, None)); // [30, 100]
-    println!("{:?}", foo(None, 70)); // [1, 70]
-    println!("{:?}", foo(None, None)); // [1, 100]
+    hello_to_file("foo.txt").unwrap();
+    hello_to_file("bar.txt".to_string()).unwrap();
+    hello_to_file(OsStr::new("baz.txt")).unwrap();
+    hello_to_file(Path::new("qux.txt")).unwrap();
 }
