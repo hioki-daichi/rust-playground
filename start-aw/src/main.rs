@@ -1,11 +1,13 @@
-fn hello(req: &actix_web::HttpRequest) -> impl actix_web::Responder {
+use actix_web::{server, App, HttpRequest, Responder};
+
+fn hello(req: &HttpRequest) -> impl Responder {
     let to = req.match_info().get("name").unwrap_or("World");
     format!("Hello {}!", to)
 }
 
 fn main() {
-    actix_web::server::new(|| {
-        actix_web::App::new()
+    server::new(|| {
+        App::new()
             .resource("/", |r| r.f(hello))
             .resource("/{name}", |r| r.f(hello))
     })
