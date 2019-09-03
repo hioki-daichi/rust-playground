@@ -1,19 +1,19 @@
-use actix_web::{server, App, Error, FromRequest, HttpRequest, Path};
+use actix_web::{server, App, Path, Responder};
 use serde_derive::*;
 
 #[derive(Deserialize)]
-struct HelloPath {
-    name: String,
+struct ArgPath {
+    arg: String,
 }
 
-fn hello_name(req: &HttpRequest) -> Result<String, Error> {
-    let to = Path::<HelloPath>::extract(req)?;
-    Ok(format!("Hello, {}!", &to.name))
+fn handler(s: Path<ArgPath>) -> impl Responder {
+    format!("Hello, {}!", &s.arg)
 }
 
 fn main() {
-    server::new(|| App::new().resource("/{name}", |r| r.f(hello_name)))
-        .bind("127.0.0.1:59090")
+    let addr = "127.0.0.1:59090";
+    server::new(|| App::new().resource("/{arg}", |r| r.with(handler)))
+        .bind(addr)
         .unwrap()
         .run();
 }
