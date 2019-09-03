@@ -1,19 +1,33 @@
-use actix_web::{server, App, Path, Responder};
-use serde_derive::*;
+use actix_web::{server, App, Error, State};
 
-#[derive(Deserialize)]
-struct ArgPath {
-    arg: String,
+struct MyApp {
+    started_at: u64,
 }
 
-fn handler(s: Path<ArgPath>) -> impl Responder {
-    format!("Hello, {}!", &s.arg)
+fn handler(app: State<MyApp>) -> Result<String, Error> {
+    Ok(format!(
+        "This server was started at {} and current unixtime is {}",
+        &app.started_at,
+        unixtime()
+    ))
 }
 
 fn main() {
     let addr = "127.0.0.1:59090";
-    server::new(|| App::new().resource("/{arg}", |r| r.with(handler)))
-        .bind(addr)
+    server::new(|| {
+        App::with_state(MyApp {
+            started_at: unixtime(),
+        })
+        .resource("/info", |r| r.with(handler))
+    })
+    .bind(addr)
+    .unwrap()
+    .run();
+}
+
+fn unixtime() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
-        .run();
+        .as_secs()
 }
