@@ -1,27 +1,8 @@
-use actix_web::{server, App, Error, FromRequest, HttpRequest, Path, Responder};
-use serde_derive::*;
-
-#[derive(Deserialize)]
-struct HelloPath {
-    name: String,
-}
-
-fn foo(req: &HttpRequest) -> Result<String, Error> {
-    let to = Path::<HelloPath>::extract(req)?;
-    Ok(format!("Hello {}!", &to.name))
-}
-
-fn bar(to: Path<HelloPath>) -> impl Responder {
-    format!("Hello {}!", &to.name)
-}
+use actix_web::{server, App, HttpResponse};
 
 fn main() {
-    server::new(|| {
-        App::new()
-            .resource("/foo/{name}", |r| r.f(foo))
-            .resource("/bar/{name}", |r| r.with(bar))
-    })
-    .bind("localhost:3000")
-    .expect("Can not bind to port 3000")
-    .run();
+    server::new(|| App::new().resource("/", |r| r.f(|_| HttpResponse::Ok())))
+        .bind("127.0.0.1:59090")
+        .unwrap()
+        .run();
 }
