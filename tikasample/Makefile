@@ -1,6 +1,6 @@
 CARGOCMD=cargo
 CARGORUN=$(CARGOCMD) run
-PDF_NAME=sample.pdf
+PDF_NAME=testdata/sample.pdf
 
 .PHONY: all
 all: sample
