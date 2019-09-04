@@ -1,32 +1,30 @@
-use std::fs::File;
-use std::io::BufReader;
-
-#[allow(unused_imports)]
 use xml::reader::{EventReader, XmlEvent};
 
 fn main() {
-    let texts = extract_texts_from_xml("foo.xml");
+    let path = extract_path_from_command_args();
+    let vec_u8 = extract_pdf_contents_by_using_tika(&path);
+    let texts = extract_texts_from_xml_data(&vec_u8[..]);
     println!("{:?}", texts);
 }
 
-#[allow(dead_code)]
-// execute_tika("sample.pdf");
-fn execute_tika(path: &str) -> String {
-    let output = std::process::Command::new("/usr/local/bin/tika")
-        .arg(path)
-        .output()
-        .expect("failed to execute process");
-    String::from_utf8(output.stdout).expect("String::from_utf8 failed")
+fn extract_path_from_command_args() -> String {
+    std::env::args()
+        .nth(1)
+        .expect("The path to the PDF file is required.")
 }
 
-#[allow(dead_code)]
-// extract_texts_from_xml("foo.xml");
-fn extract_texts_from_xml(path: &str) -> Vec<String> {
-    let file = File::open(path).unwrap();
-    let file = BufReader::new(file);
-    let parser = EventReader::new(file);
-    let mut texts: Vec<String> = vec![];
-    for e in parser {
+fn extract_pdf_contents_by_using_tika(path: &String) -> Vec<u8> {
+    std::process::Command::new("tika")
+        .arg(path)
+        .output()
+        .expect("failed to execute process")
+        .stdout
+}
+
+fn extract_texts_from_xml_data(source: &[u8]) -> Vec<String> {
+    let mut texts = vec![];
+
+    for e in EventReader::new(source) {
         match e {
             Ok(XmlEvent::Characters(text)) => {
                 texts.push(text);
@@ -38,5 +36,6 @@ fn extract_texts_from_xml(path: &str) -> Vec<String> {
             _ => {}
         }
     }
+
     texts
 }
