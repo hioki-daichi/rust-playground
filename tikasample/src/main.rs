@@ -1,9 +1,13 @@
+use std::env;
 use std::process::Command;
 use walkdir::WalkDir;
 use xml::reader::{EventReader, XmlEvent};
 
 fn main() {
-    for entry in WalkDir::new("testdata") {
+    let dirname = env::args()
+        .nth(1)
+        .expect("Specify the directory where the PDF file is stored.");
+    for entry in WalkDir::new(dirname) {
         let entry = entry.unwrap();
         let path = entry.path();
         let metadata = path.metadata().unwrap();
