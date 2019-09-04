@@ -1,5 +1,8 @@
+use std::env;
+use std::process::Command;
 use xml::reader::{EventReader, XmlEvent};
 
+// $ cargo run sample.pdf
 fn main() {
     let path = extract_path_from_command_args();
     let vec_u8 = extract_pdf_contents_by_using_tika(&path);
@@ -8,13 +11,13 @@ fn main() {
 }
 
 fn extract_path_from_command_args() -> String {
-    std::env::args()
+    env::args()
         .nth(1)
         .expect("The path to the PDF file is required.")
 }
 
 fn extract_pdf_contents_by_using_tika(path: &String) -> Vec<u8> {
-    std::process::Command::new("tika")
+    Command::new("tika")
         .arg(path)
         .output()
         .expect("failed to execute process")
