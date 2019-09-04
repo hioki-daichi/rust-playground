@@ -1,21 +1,21 @@
-use std::env;
 use std::process::Command;
+use walkdir::WalkDir;
 use xml::reader::{EventReader, XmlEvent};
 
 fn main() {
-    let path = extract_path_from_command_args();
-    let vec_u8 = extract_pdf_contents_by_using_tika(&path);
-    let texts = extract_texts_from_xml_data(&vec_u8[..]);
-    println!("{:?}", texts);
+    for entry in WalkDir::new("testdata") {
+        let entry = entry.unwrap();
+        let path = entry.path();
+        let metadata = path.metadata().unwrap();
+        if metadata.is_file() {
+            let vec_u8 = extract_pdf_contents_by_using_tika(path.to_str().unwrap());
+            let texts = extract_texts_from_xml_data(&vec_u8[..]);
+            println!("{:?}", texts);
+        }
+    }
 }
 
-fn extract_path_from_command_args() -> String {
-    env::args()
-        .nth(1)
-        .expect("The path to the PDF file is required.")
-}
-
-fn extract_pdf_contents_by_using_tika(path: &String) -> Vec<u8> {
+fn extract_pdf_contents_by_using_tika(path: &str) -> Vec<u8> {
     Command::new("tika")
         .arg(path)
         .output()
