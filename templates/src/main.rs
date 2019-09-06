@@ -1,3 +1,9 @@
+use tera::Tera;
+
+struct AppState {
+    template: Tera,
+}
+
 fn main() {
-    println!("Hello, world!");
+    println!("{:?}", 1);
 }
