@@ -1,7 +1,11 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+pub mod logs {
+    pub mod get {}
+
+    pub mod post {}
+}
+
+pub mod csv {
+    pub mod get {}
+
+    pub mod post {}
 }
