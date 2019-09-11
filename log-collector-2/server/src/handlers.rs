@@ -1,3 +1,4 @@
+use crate::db;
 use crate::Server;
 
 pub fn handle_post_csv(
@@ -14,10 +15,24 @@ pub fn handle_post_csv(
 }
 
 pub fn handle_post_logs(
-    _server: actix_web::State<Server>,
+    server: actix_web::State<Server>,
     log: actix_web::Json<api::logs::post::Request>,
 ) -> Result<actix_web::HttpResponse, failure::Error> {
-    log::debug!("{:?}", log);
+    use crate::model::NewLog;
+    use chrono::Utc;
+
+    let user_agent = log.user_agent.clone();
+    let response_time = log.response_time;
+    let timestamp = log.timestamp.unwrap_or_else(|| Utc::now()).naive_utc();
+
+    let log = NewLog {
+        user_agent,
+        response_time,
+        timestamp,
+    };
+    let pooled_connection = server.pool.get()?;
+    db::insert_log(&pooled_connection, &log)?;
+    log::debug!("received log: {:?}", log);
     Ok(actix_web::HttpResponse::Accepted().finish())
 }
 
