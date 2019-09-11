@@ -3,6 +3,7 @@ extern crate diesel;
 
 use actix_web;
 
+mod db;
 mod handlers;
 mod model;
 mod schema;
