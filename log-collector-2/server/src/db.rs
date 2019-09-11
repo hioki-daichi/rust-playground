@@ -12,6 +12,7 @@ pub fn insert_log(
         .get_result(connection)
 }
 
+#[allow(dead_code)]
 pub fn insert_logs(
     connection: &PgConnection,
     logs: &[crate::model::NewLog],
