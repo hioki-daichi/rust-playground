@@ -37,12 +37,21 @@ pub fn handle_post_logs(
 }
 
 pub fn handle_get_logs(
-    _server: actix_web::State<Server>,
+    server: actix_web::State<Server>,
     range: actix_web::Query<api::logs::get::Query>,
 ) -> Result<actix_web::HttpResponse, failure::Error> {
     log::debug!("{:?}", range);
 
-    let logs = Default::default();
+    let pooled_connection = server.pool.get()?;
+    let logs = db::logs(&pooled_connection, range.from, range.until)?;
+    let logs = logs
+        .into_iter()
+        .map(|log| api::Log {
+            user_agent: log.user_agent,
+            response_time: log.response_time,
+            timestamp: chrono::DateTime::from_utc(log.timestamp, chrono::Utc),
+        })
+        .collect();
 
     let resp = api::logs::get::Response(logs);
 

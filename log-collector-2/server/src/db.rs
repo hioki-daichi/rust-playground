@@ -24,3 +24,23 @@ pub fn insert_logs(
         .returning(dsl::id)
         .load(connection)
 }
+
+pub fn logs(
+    connection: &PgConnection,
+    from: Option<chrono::DateTime<chrono::Utc>>,
+    until: Option<chrono::DateTime<chrono::Utc>>,
+) -> diesel::result::QueryResult<Vec<crate::model::Log>> {
+    use crate::schema::logs::dsl;
+
+    let mut query = dsl::logs.into_boxed();
+
+    if let Some(from) = from {
+        query = query.filter(dsl::timestamp.ge(from.naive_utc()))
+    }
+
+    if let Some(until) = until {
+        query = query.filter(dsl::timestamp.lt(until.naive_utc()))
+    }
+
+    query.order(dsl::timestamp.asc()).load(connection)
+}
