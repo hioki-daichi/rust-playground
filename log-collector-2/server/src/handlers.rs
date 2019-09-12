@@ -4,29 +4,6 @@ use itertools::Itertools;
 
 use futures::prelude::*;
 
-pub fn handle_post_csv(
-    server: actix_web::State<Server>,
-    // Multiparts で来たファイルデータを一時ファイルに保存する。
-    // Futures の Stream を実装しているためそのまま Stream のメソッドを呼べる。
-    // Stream は非同期版イテレータのようなもので、ファイルの保存が終わり次第順に取り出されるイメージ。
-    multiparts: actix_web_multipart_file::Multiparts,
-) -> actix_web::FutureResponse<actix_web::HttpResponse> {
-    let fut = multiparts
-        .from_err() // map_err(From::from) と同じ挙動をする Stream のメソッド。Future/Stream では ? 演算子によるエラー型の自動変換ができないためこのようなメソッドが用意されている。
-        .filter(|field| field.content_type == "text/csv") // Iterator にもあるメソッドの Stream 版。
-        .filter_map(|field| match field.form_data {
-            // Stream..
-            actix_web_multipart_file::FormData::File { file, .. } => Some(file),
-            actix_web_multipart_file::FormData::Data { .. } => None,
-        })
-        .and_then(move |file| load_file(&*server.pool.get()?, file)) // load_file の部分が本 handler の本体。与えられたファイルを CSV としてパースし、DB に保存する関数。
-        .fold(0, |acc, x| Ok::<_, failure::Error>(acc + x)) // Iterator にもあるメソッドの Stream 版。
-        .map(|sum| actix_web::HttpResponse::Ok().json(api::csv::post::Response(sum)))
-        .from_err();
-
-    Box::new(fut)
-}
-
 // DB に挿入した Log の件数を Result<usize, Error> 型で返す。
 fn load_file(
     connection: &diesel::PgConnection,
@@ -105,24 +82,52 @@ pub fn handle_get_logs(
     Ok(actix_web::HttpResponse::Ok().json(resp))
 }
 
+pub fn handle_post_csv(
+    server: actix_web::State<Server>,
+    // Multiparts で来たファイルデータを一時ファイルに保存する。
+    // Futures の Stream を実装しているためそのまま Stream のメソッドを呼べる。
+    // Stream は非同期版イテレータのようなもので、ファイルの保存が終わり次第順に取り出されるイメージ。
+    multiparts: actix_web_multipart_file::Multiparts,
+) -> actix_web::FutureResponse<actix_web::HttpResponse> {
+    let fut = multiparts
+        .from_err() // map_err(From::from) と同じ挙動をする Stream のメソッド。Future/Stream では ? 演算子によるエラー型の自動変換ができないためこのようなメソッドが用意されている。
+        .filter(|field| field.content_type == "text/csv") // Iterator にもあるメソッドの Stream 版。
+        .filter_map(|field| match field.form_data {
+            // Stream..
+            actix_web_multipart_file::FormData::File { file, .. } => Some(file),
+            actix_web_multipart_file::FormData::Data { .. } => None,
+        })
+        .and_then(move |file| load_file(&*server.pool.get()?, file)) // load_file の部分が本 handler の本体。与えられたファイルを CSV としてパースし、DB に保存する関数。
+        .fold(0, |acc, x| Ok::<_, failure::Error>(acc + x)) // Iterator にもあるメソッドの Stream 版。
+        .map(|sum| actix_web::HttpResponse::Ok().json(api::csv::post::Response(sum)))
+        .from_err();
+
+    Box::new(fut)
+}
+
 pub fn handle_get_csv(
     server: actix_web::State<Server>,
     range: actix_web::Query<api::csv::get::Query>,
 ) -> Result<actix_web::HttpResponse, failure::Error> {
+    use chrono::{DateTime, Utc};
+
     let pooled_connection = server.pool.get()?;
-    let logs = db::logs(&pooled_connection, range.from, range.until)?;
+
+    let logs: Vec<crate::model::Log> = db::logs(&pooled_connection, range.from, range.until)?;
+
     let v = Vec::new();
+
     let mut w = csv::Writer::from_writer(v);
 
-    for log in logs.into_iter().map(|log| ::api::Log {
+    for log in logs.into_iter().map(|log| api::Log {
         user_agent: log.user_agent,
         response_time: log.response_time,
-        timestamp: chrono::DateTime::from_utc(log.timestamp, chrono::Utc),
+        timestamp: DateTime::from_utc(log.timestamp, Utc),
     }) {
         w.serialize(log)?;
     }
 
-    let csv: Vec<u8> = vec![];
+    let csv = w.into_inner()?;
 
     Ok(actix_web::HttpResponse::Ok()
         .header("Content-Type", "text/csv")
