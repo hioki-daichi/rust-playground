@@ -1,5 +1,5 @@
+use clap::arg_enum;
 use clap::{App, AppSettings, Arg, SubCommand};
-use clap::{_clap_count_exprs, arg_enum};
 use reqwest::Client;
 use std::io;
 
