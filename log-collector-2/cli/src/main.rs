@@ -1,7 +1,4 @@
 use clap::arg_enum;
-use clap::{App, AppSettings, Arg, SubCommand};
-use reqwest::Client;
-use std::io;
 
 arg_enum! {
     #[derive(Debug)]
@@ -12,9 +9,9 @@ arg_enum! {
 }
 
 fn main() {
-    let client = Client::new();
+    let client = reqwest::Client::new();
 
-    let server_arg = Arg::with_name("SERVER")
+    let server_arg = clap::Arg::with_name("SERVER")
         .help("server url")
         .short("s")
         .long("server")
@@ -22,25 +19,27 @@ fn main() {
         .value_name("URL")
         .default_value("localhost:3000");
 
-    let format_arg = Arg::with_name("FORMAT")
+    let format_arg = clap::Arg::with_name("FORMAT")
         .help("log format")
         .short("f")
         .long("format")
         .takes_value(true)
         .case_insensitive(true)
+        .default_value("json")
         .possible_values(&Format::variants());
 
-    let get_subcommand = SubCommand::with_name("get")
+    let get_subcommand = clap::SubCommand::with_name("get")
         .about("get logs")
         .arg(format_arg);
 
-    let post_subcommand = SubCommand::with_name("post").about("post logs, taking input from stdin");
+    let post_subcommand =
+        clap::SubCommand::with_name("post").about("post logs, taking input from stdin");
 
-    let opts = App::new(env!("CARGO_PKG_NAME"))
+    let opts = clap::App::new(env!("CARGO_PKG_NAME"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
-        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .setting(clap::AppSettings::SubcommandRequiredElseHelp)
         .arg(server_arg)
         .subcommand(get_subcommand)
         .subcommand(post_subcommand);
@@ -58,7 +57,7 @@ fn main() {
 
             match format {
                 Format::Csv => {
-                    let out = io::stdout();
+                    let out = std::io::stdout();
                     let mut out = out.lock();
 
                     client
@@ -82,8 +81,8 @@ fn main() {
             }
         }
         ("post", _) => {
-            for result_of_logs_as_post_request in
-                csv::Reader::from_reader(io::stdin()).into_deserialize::<api::logs::post::Request>()
+            for result_of_logs_as_post_request in csv::Reader::from_reader(std::io::stdin())
+                .into_deserialize::<api::logs::post::Request>()
             {
                 let logs_as_post_request = match result_of_logs_as_post_request {
                     Ok(v) => v,
