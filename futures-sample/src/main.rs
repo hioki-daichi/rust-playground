@@ -1,24 +1,26 @@
-use futures::future::ok;
+use failure::{err_msg, Error, Fail};
 use futures::Future;
-use std::error::Error;
-
-fn my_fut() -> impl Future<Item = u32, Error = Box<dyn Error + 'static>> {
-    ok(100)
-}
-
-fn my_fut_squared(i: u32) -> impl Future<Item = u32, Error = Box<dyn Error + 'static>> {
-    ok(i * i)
-}
 
 fn main() {
-    println!("{}", "1");
-    let b2 = my_fut().and_then(|b1| {
-        println!("{}", "2");
-        let x = my_fut_squared(b1);
-        println!("{}", "3");
-        x
-    });
-    println!("{}", "4");
-    println!("{:?}", b2.wait());
-    println!("{}", "5");
-} // 1 4 2 3 Ok(10000) 5
+    println!("{:?}", f(100).wait());
+}
+
+#[derive(Debug, Fail)]
+#[fail(display = "my wrapping error")]
+struct WrappingError(#[fail(cause)] Error);
+
+fn f(n: u32) -> impl Future<Item = u32, Error = Error> {
+    add1(n).and_then(|b| mul2(b))
+}
+
+fn add1(n: u32) -> impl Future<Item = u32, Error = Error> {
+    futures::future::ok(n + 1)
+}
+
+fn mul2(n: u32) -> impl Future<Item = u32, Error = Error> {
+    futures::future::ok(n * 2)
+}
+
+fn cause_err(s: String) -> impl Future<Item = u32, Error = Error> {
+    futures::future::err(failure::Error { WrappingError.into() })
+}
