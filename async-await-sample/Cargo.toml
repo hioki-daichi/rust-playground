@@ -1,0 +1,10 @@
+[package]
+name = "async-await-sample"
+version = "0.1.0"
+authors = ["Daichi Hioki <hiokidaichi@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+futures-preview = { version = "=0.3.0-alpha.19", features = ["async-await"] }
