@@ -2,18 +2,26 @@ use actix_web::client::Client;
 use actix_web::*;
 use futures::future::ok;
 use futures::Future;
+use serde_derive::*;
 
-fn main() {
-    HttpServer::new(|| App::new().route("/", web::get().to_async(handler)))
-        .bind("127.0.0.1:8080")
-        .unwrap()
-        .run()
-        .unwrap()
+#[derive(Deserialize)]
+struct Info {
+    username: String,
 }
 
-fn handler() -> impl Future<Item = HttpResponse, Error = ()> {
+fn main() {
+    HttpServer::new(|| {
+        App::new().service(web::resource("/{username}").route(web::get().to_async(handler)))
+    })
+    .bind("127.0.0.1:8080")
+    .unwrap()
+    .run()
+    .unwrap()
+}
+
+fn handler(info: web::Path<Info>) -> impl Future<Item = HttpResponse, Error = ()> {
     Client::default()
-        .get("https://httpbin.org/get")
+        .get(format!("https://github.com/{}.keys", info.username))
         .send()
         .map_err(|e| {
             println!("{:?}", e);

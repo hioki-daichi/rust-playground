@@ -11,3 +11,5 @@ actix-rt = "*"
 actix-web = { version = "*", features = ["ssl"] }
 failure = "*"
 futures = "*"
+serde = "*"
+serde_derive = "*"
