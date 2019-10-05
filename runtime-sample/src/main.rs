@@ -28,10 +28,11 @@ fn main() {
 }
 
 fn handler(
-    data: web::Data<Config>,
+    config: web::Data<Config>,
     info: web::Path<Info>,
 ) -> impl Future<Item = HttpResponse, Error = ()> {
-    let url = format!("{}/{}.keys", data.github_url, info.username);
+    let url = format!("{}/{}.keys", config.github_url, info.username);
+
     Client::default()
         .get(url)
         .send()
