@@ -10,8 +10,6 @@ fn main() {
         .unwrap()
 }
 
-fn index() -> Box<dyn Future<Item = HttpResponse, Error = actix_web::Error>> {
-    Box::new(ok::<_, Error>(
-        HttpResponse::Ok().content_type("text/html").body("Hello!"),
-    ))
+fn index() -> impl Future<Item = HttpResponse, Error = actix_web::Error> {
+    ok::<_, Error>(HttpResponse::Ok().content_type("text/html").body("Hello!"))
 }
