@@ -9,9 +9,17 @@ struct Info {
     username: String,
 }
 
+struct Config {
+    github_url: &'static str,
+}
+
 fn main() {
     HttpServer::new(|| {
-        App::new().service(web::resource("/{username}").route(web::get().to_async(handler)))
+        App::new()
+            .data(Config {
+                github_url: "https://github.com",
+            })
+            .service(web::resource("/{username}").route(web::get().to_async(handler)))
     })
     .bind("127.0.0.1:8080")
     .unwrap()
@@ -19,9 +27,13 @@ fn main() {
     .unwrap()
 }
 
-fn handler(info: web::Path<Info>) -> impl Future<Item = HttpResponse, Error = ()> {
+fn handler(
+    data: web::Data<Config>,
+    info: web::Path<Info>,
+) -> impl Future<Item = HttpResponse, Error = ()> {
+    let url = format!("{}/{}.keys", data.github_url, info.username);
     Client::default()
-        .get(format!("https://github.com/{}.keys", info.username))
+        .get(url)
         .send()
         .map_err(|e| {
             println!("{:?}", e);
