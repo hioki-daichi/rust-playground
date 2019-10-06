@@ -33,6 +33,10 @@ fn handler(
 ) -> impl Future<Item = HttpResponse, Error = ()> {
     let url = format!("{}/{}.keys", config.github_url, info.username);
 
+    send_request(url).and_then(|body| ok(HttpResponse::Ok().content_type("text/html").body(body)))
+}
+
+fn send_request(url: String) -> impl Future<Item = String, Error = ()> {
     Client::default()
         .get(url)
         .send()
@@ -41,8 +45,6 @@ fn handler(
             ()
         })
         .and_then(|mut response| {
-            ok(HttpResponse::Ok()
-                .content_type("text/html")
-                .body(String::from_utf8(response.body().wait().unwrap().to_vec()).unwrap()))
+            ok(String::from_utf8(response.body().wait().unwrap().to_vec()).unwrap())
         })
 }
