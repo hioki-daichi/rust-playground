@@ -1,7 +1,7 @@
 use actix_web::client::Client;
 use actix_web::*;
 use futures::future::ok;
-use futures::Future;
+use futures::{future::Either, Future};
 use serde_derive::*;
 
 #[derive(Deserialize)]
@@ -33,7 +33,19 @@ fn handler(
 ) -> impl Future<Item = HttpResponse, Error = ()> {
     let url = format!("{}/{}.keys", config.github_url, info.username);
 
-    send_request(url).and_then(|body| ok(HttpResponse::Ok().content_type("text/html").body(body)))
+    let foo = if true {
+        Either::A(
+            send_request(url)
+                .and_then(|body| ok(HttpResponse::Ok().content_type("text/html").body(body))),
+        )
+    } else {
+        Either::B(
+            send_request(url)
+                .and_then(|body| ok(HttpResponse::Ok().content_type("text/plain").body(body))),
+        )
+    };
+
+    foo
 }
 
 fn send_request(url: String) -> impl Future<Item = String, Error = ()> {
