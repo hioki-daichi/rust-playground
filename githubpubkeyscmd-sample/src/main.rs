@@ -17,16 +17,13 @@ fn main() {
 }
 
 fn send_request() -> impl Future<Item = String, Error = Error> {
-    result(
-        Client::default()
-            .get("https://github.com/hioki-daichi")
-            .send()
-            .map_err(|e| MyError::A(format!("{}", e)).into())
-            .and_then(|mut response| {
-                ok(String::from_utf8(response.body().wait().unwrap().to_vec()).unwrap())
-            })
-            .wait(),
-    )
+    Client::default()
+        .get("https://github.com/hioki-daichi")
+        .send()
+        .map_err(|e| MyError::A(format!("{}", e)).into())
+        .and_then(|mut response| {
+            ok(String::from_utf8(response.body().wait().unwrap().to_vec()).unwrap())
+        })
 }
 
 #[derive(Debug, Fail)]
