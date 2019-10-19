@@ -15,8 +15,7 @@ struct SetOnDrop<'a, T> {
     value: Option<T>,
 }
 
-// 2015
-impl<'a, T> Drop for SetOnDrop<'a, T> {
+impl<T> Drop for SetOnDrop<'_, T> {
     fn drop(&mut self) {
         if let Some(x) = self.value.take() {
             *self.borrow = x;
