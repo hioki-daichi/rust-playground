@@ -1,11 +1,11 @@
-struct Context<'b>(&'b str);
+struct Context<'s>(&'s str);
 
-struct Parser<'a, 'b> {
-    context: &'a Context<'b>,
+struct Parser<'c, 's> {
+    context: &'c Context<'s>,
 }
 
-impl<'a, 'b> Parser<'a, 'b> {
-    fn parse(&'a self) -> Result<(), &'b str> {
+impl<'c, 's> Parser<'c, 's> {
+    fn parse(&'c self) -> Result<(), &'s str> {
         Err(&self.context.0[1..])
     }
 }
