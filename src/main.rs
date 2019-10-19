@@ -1,26 +1,12 @@
-trait MyIterator {
-    type Item;
-    fn next(&mut self) -> Option<Self::Item>;
+fn foo(x: &i32, y: &i32) {
+    println!("{:?} {:?}", x, y);
 }
 
-impl<I: MyIterator> MyIterator for &mut I {
-    type Item = I::Item;
-    fn next(&mut self) -> Option<Self::Item> {
-        (*self).next()
-    }
+fn bar<'a, 'b>(x: &'a i32, y: &'b i32) {
+    println!("{:?} {:?}", x, y);
 }
 
-struct SetOnDrop<'a, T> {
-    borrow: &'a mut T,
-    value: Option<T>,
+fn main() {
+    foo(&1, &2);
+    bar(&1, &2);
 }
-
-impl<T> Drop for SetOnDrop<'_, T> {
-    fn drop(&mut self) {
-        if let Some(x) = self.value.take() {
-            *self.borrow = x;
-        }
-    }
-}
-
-fn main() {}
