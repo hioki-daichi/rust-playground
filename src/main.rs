@@ -1,28 +1,15 @@
-fn foo(x: &i32, y: &i32) {
-    println!("{:?} {:?}", x, y);
-}
-
-fn bar<'a, 'b>(x: &'a i32, y: &'b i32) {
-    println!("{:?} {:?}", x, y);
-}
-
-fn baz<'a, 'b>(x: &'a mut i32, y: &'b i32) -> i32 {
-    *x += y;
-    *x
-}
-
 struct Foo<'a> {
     x: &'a i32,
 }
 
-fn main() {
-    foo(&1, &2);
-    bar(&1, &2);
-    let mut a: i32 = 100;
-    baz(&mut a, &5);
-    println!("{:?}", a);
+impl<'a> Foo<'a> {
+    fn x(&self) -> &'a i32 {
+        self.x
+    }
+}
 
-    let foo1 = &1;
-    let foo2 = Foo { x: foo1 };
-    println!("{:?}", foo2.x);
+fn main() {
+    let y = &5;
+    let f = Foo { x: y };
+    println!("{:?}", f.x());
 }
