@@ -1,6 +1,6 @@
 struct Context<'s>(&'s str);
 
-struct Parser<'c, 's> {
+struct Parser<'c, 's: 'c> {
     context: &'c Context<'s>,
 }
 
