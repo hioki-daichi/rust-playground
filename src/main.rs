@@ -1,15 +1,23 @@
-struct Foo<'a> {
-    x: &'a i32,
+struct Context<'b>(&'b str);
+
+struct Parser<'a, 'b> {
+    context: &'a Context<'b>,
 }
 
-impl<'a> Foo<'a> {
-    fn x(&self) -> &'a i32 {
-        self.x
+impl<'a, 'b> Parser<'a, 'b> {
+    fn parse(&'a self) -> Result<(), &'b str> {
+        Err(&self.context.0[1..])
     }
 }
 
+fn parse_context(context: Context) -> Result<(), &str> {
+    Parser { context: &context }.parse()
+}
+
 fn main() {
-    let y = &5;
-    let f = Foo { x: y };
-    println!("{:?}", f.x());
+    let ctx = Context("foo");
+    match parse_context(ctx) {
+        Ok(_) => println!("{:?}", "ok"),
+        Err(s) => println!("{:?}", s),
+    }
 }
