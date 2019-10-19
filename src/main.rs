@@ -1,14 +1,13 @@
-fn main() {
-    let string1 = String::from("abcd");
-    let string2 = "xyz";
-    let result = longest(string1.as_str(), string2);
-    println!("{:?}", result);
+trait MyIterator {
+    type Item;
+    fn next(&mut self) -> Option<Self::Item>;
 }
 
-fn longest<'a>(a: &'a str, b: &'a str) -> &'a str {
-    if a.len() > b.len() {
-        a
-    } else {
-        b
+impl<'a, I: MyIterator> MyIterator for &'a mut I {
+    type Item = I::Item;
+    fn next(&mut self) -> Option<Self::Item> {
+        (*self).next()
     }
 }
+
+fn main() {}
