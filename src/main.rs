@@ -11,10 +11,18 @@ fn baz<'a, 'b>(x: &'a mut i32, y: &'b i32) -> i32 {
     *x
 }
 
+struct Foo<'a> {
+    x: &'a i32,
+}
+
 fn main() {
     foo(&1, &2);
     bar(&1, &2);
     let mut a: i32 = 100;
     baz(&mut a, &5);
     println!("{:?}", a);
+
+    let foo1 = &1;
+    let foo2 = Foo { x: foo1 };
+    println!("{:?}", foo2.x);
 }
