@@ -1,9 +1,11 @@
 use stdweb::web::Date;
+use yew::prelude::*;
 use yew::services::ConsoleService;
-use yew::{html, Component, ComponentLink, Html, Renderable, ShouldRender};
 
 fn main() {
-    yew::start_app::<Model>();
+    yew::initialize();
+    App::<Model>::new().mount_to_body();
+    yew::run_loop();
 }
 
 struct Model {
