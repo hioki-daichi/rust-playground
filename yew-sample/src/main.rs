@@ -25,7 +25,7 @@ struct Model {
     console: ConsoleService,
     link: ComponentLink<Model>,
     ft: Option<FetchTask>,
-    value: String,
+    svg: String,
 }
 
 enum Msg {
@@ -44,7 +44,7 @@ impl Component for Model {
             link,
             console: ConsoleService::new(),
             ft: None,
-            value: String::from(""),
+            svg: String::from(""),
         }
     }
 
@@ -65,12 +65,9 @@ impl Component for Model {
                 self.ft = Some(self.fetch_service.fetch(request, callback));
             }
             Msg::FetchReady(body) => {
-                self.console.log("cCCCCCCCCCCCCCCCCCC");
-                let s = body.unwrap();
-                self.value = s;
+                self.svg = body.unwrap();
             }
             Msg::Ignore => {
-                self.console.log("FFFFFFFFFFFFFF");
                 self.console.log("ignore");
             }
         }
@@ -86,19 +83,16 @@ impl Renderable<Model> for Model {
                     <button onclick=|_| Msg::SendRequest>{ "Send" }</button>
                 </nav>
                 <p>{
-                    let v = self.value.as_str();
+                    let v = self.svg.as_str();
                     if v == "" {
                         VNode::default()
                     } else {
                         let js_svg = js! {
                             var div = document.createElement("div");
                             div.innerHTML = @{v};
-                            console.log(div);
                             return div;
                         };
-                        let node = Node::try_from(js_svg).expect("foo");
-                        let vnode: Html<Self> = VNode::VRef(node);
-                        vnode
+                        VNode::VRef(Node::try_from(js_svg).expect("foo"))
                     }
                 }</p>
             </div>
