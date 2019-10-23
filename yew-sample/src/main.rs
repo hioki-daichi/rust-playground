@@ -3,7 +3,6 @@
 #[macro_use]
 extern crate stdweb;
 
-use failure::Error;
 use stdweb::unstable::TryFrom;
 use stdweb::web::Node;
 use yew::format::{Nothing, Text};
@@ -27,13 +26,14 @@ struct Model {
     ft: Option<FetchTask>,
     svg: String,
     username: String,
+    is_loading: bool,
 }
 
 enum Msg {
     SendRequest,
-    FetchReady(Result<String, Error>),
+    FetchReady(String),
     Ignore,
-    UpdateEdit(String),
+    EditUsername(String),
 }
 
 impl Component for Model {
@@ -48,16 +48,18 @@ impl Component for Model {
             ft: None,
             svg: String::from(""),
             username: String::from(""),
+            is_loading: false,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::SendRequest => {
+                self.is_loading = true;
                 let callback = self.link.send_back(move |response: Response<Text>| {
                     let (parts, body) = response.into_parts();
                     if parts.status.is_success() {
-                        Msg::FetchReady(body)
+                        Msg::FetchReady(body.unwrap())
                     } else {
                         Msg::Ignore
                     }
@@ -68,14 +70,15 @@ impl Component for Model {
                 self.ft = Some(self.fetch_service.fetch(request, callback));
             }
             Msg::FetchReady(body) => {
-                self.svg = body.unwrap();
+                self.is_loading = false;
+                self.svg = body;
             }
             Msg::Ignore => {
-                self.console.log("ignore");
+                self.is_loading = false;
+                self.svg = String::from("");
             }
-            Msg::UpdateEdit(val) => {
-                self.console.log(&format!("val: {}", &val));
-                self.username = val;
+            Msg::EditUsername(username) => {
+                self.username = username;
             }
         }
         true
@@ -85,19 +88,22 @@ impl Component for Model {
 impl Renderable<Model> for Model {
     fn view(&self) -> Html<Self> {
         let js_result = js! {
-            var element = document.createElement("div");
-            element.innerHTML = @{self.svg.as_str()};
-            return element;
+          var element = document.createElement("div");
+          element.innerHTML = @{self.svg.as_str()};
+          return element;
         };
         let node = Node::try_from(js_result).expect("failed to convert js_result to node");
         let vnode = VNode::VRef(node);
 
+        let loading_message = if self.is_loading { "loading..." } else { "" };
+
         html! {
-            <div>
-                <input type="text" oninput=|e| Msg::UpdateEdit(e.value) />
-                <button onclick=|_| Msg::SendRequest>{ "Send" }</button>
-                { vnode }
-            </div>
+          <div>
+            <input type="text" oninput=|e| Msg::EditUsername(e.value) />
+            <button class="send" onclick=|_| Msg::SendRequest>{ "Send" }</button>
+            <span class="loading">{loading_message}</span>
+            { vnode }
+          </div>
         }
     }
 }
