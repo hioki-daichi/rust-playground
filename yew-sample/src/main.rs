@@ -77,24 +77,18 @@ impl Component for Model {
 
 impl Renderable<Model> for Model {
     fn view(&self) -> Html<Self> {
+        let js_result = js! {
+            var element = document.createElement("div");
+            element.innerHTML = @{self.svg.as_str()};
+            return element;
+        };
+        let node = Node::try_from(js_result).expect("failed to convert js_result to node");
+        let vnode = VNode::VRef(node);
+
         html! {
             <div>
-                <nav class="menu">
-                    <button onclick=|_| Msg::SendRequest>{ "Send" }</button>
-                </nav>
-                <p>{
-                    let v = self.svg.as_str();
-                    if v == "" {
-                        VNode::default()
-                    } else {
-                        let js_svg = js! {
-                            var div = document.createElement("div");
-                            div.innerHTML = @{v};
-                            return div;
-                        };
-                        VNode::VRef(Node::try_from(js_svg).expect("foo"))
-                    }
-                }</p>
+                <button onclick=|_| Msg::SendRequest>{ "Send" }</button>
+                { vnode }
             </div>
         }
     }
