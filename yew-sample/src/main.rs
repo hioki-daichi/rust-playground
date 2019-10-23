@@ -92,7 +92,9 @@ impl Renderable<Model> for Model {
           element.innerHTML = @{self.svg.as_str()};
           return element;
         };
+
         let node = Node::try_from(js_result).expect("failed to convert js_result to node");
+
         let vnode = VNode::VRef(node);
 
         let loading_message = if self.is_loading { "loading..." } else { "" };
