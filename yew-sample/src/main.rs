@@ -1,10 +1,18 @@
+#![recursion_limit = "256"]
+
+#[macro_use]
+extern crate stdweb;
+
 use failure::Error;
+use stdweb::unstable::TryFrom;
+use stdweb::web::Node;
 use yew::format::{Nothing, Text};
 use yew::prelude::*;
 use yew::services::{
     fetch::{FetchTask, Request, Response},
     ConsoleService, FetchService,
 };
+use yew::virtual_dom::VNode;
 
 fn main() {
     yew::initialize();
@@ -57,9 +65,12 @@ impl Component for Model {
                 self.ft = Some(self.fetch_service.fetch(request, callback));
             }
             Msg::FetchReady(body) => {
-                self.value = body.unwrap();
+                self.console.log("cCCCCCCCCCCCCCCCCCC");
+                let s = body.unwrap();
+                self.value = s;
             }
             Msg::Ignore => {
+                self.console.log("FFFFFFFFFFFFFF");
                 self.console.log("ignore");
             }
         }
@@ -74,7 +85,22 @@ impl Renderable<Model> for Model {
                 <nav class="menu">
                     <button onclick=|_| Msg::SendRequest>{ "Send" }</button>
                 </nav>
-                <pre>{ self.value.as_str() }</pre>
+                <p>{
+                    let v = self.value.as_str();
+                    if v == "" {
+                        VNode::default()
+                    } else {
+                        let js_svg = js! {
+                            var div = document.createElement("div");
+                            div.innerHTML = @{v};
+                            console.log(div);
+                            return div;
+                        };
+                        let node = Node::try_from(js_svg).expect("foo");
+                        let vnode: Html<Self> = VNode::VRef(node);
+                        vnode
+                    }
+                }</p>
             </div>
         }
     }
