@@ -1,6 +1,10 @@
-use stdweb::web::Date;
+use failure::Error;
+use yew::format::{Nothing, Text};
 use yew::prelude::*;
-use yew::services::ConsoleService;
+use yew::services::{
+    fetch::{FetchTask, Request, Response},
+    ConsoleService, FetchService,
+};
 
 fn main() {
     yew::initialize();
@@ -9,42 +13,54 @@ fn main() {
 }
 
 struct Model {
+    fetch_service: FetchService,
     console: ConsoleService,
-    value: i64,
+    link: ComponentLink<Model>,
+    ft: Option<FetchTask>,
+    value: String,
 }
 
 enum Msg {
-    Increment,
-    Decrement,
-    Bulk(Vec<Msg>),
+    SendRequest,
+    FetchReady(Result<String, Error>),
+    Ignore,
 }
 
 impl Component for Model {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_: Self::Properties, _: ComponentLink<Self>) -> Self {
+    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
         Model {
+            fetch_service: FetchService::new(),
+            link,
             console: ConsoleService::new(),
-            value: 0,
+            ft: None,
+            value: String::from(""),
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::Increment => {
-                self.value = self.value + 1;
-                self.console.log("plus one");
+            Msg::SendRequest => {
+                let callback = self.link.send_back(move |response: Response<Text>| {
+                    let (parts, body) = response.into_parts();
+                    if parts.status.is_success() {
+                        Msg::FetchReady(body)
+                    } else {
+                        Msg::Ignore
+                    }
+                });
+                let request = Request::get("http://127.0.0.1:8080/hioki-daichi")
+                    .body(Nothing)
+                    .unwrap();
+                self.ft = Some(self.fetch_service.fetch(request, callback));
             }
-            Msg::Decrement => {
-                self.value = self.value - 1;
-                self.console.log("minus one");
+            Msg::FetchReady(body) => {
+                self.value = body.unwrap();
             }
-            Msg::Bulk(list) => {
-                for msg in list {
-                    self.update(msg);
-                    self.console.log("Bulk action");
-                }
+            Msg::Ignore => {
+                self.console.log("ignore");
             }
         }
         true
@@ -56,12 +72,9 @@ impl Renderable<Model> for Model {
         html! {
             <div>
                 <nav class="menu">
-                    <button onclick=|_| Msg::Increment>{ "Increment" }</button>
-                    <button onclick=|_| Msg::Decrement>{ "Decrement" }</button>
-                    <button onclick=|_| Msg::Bulk(vec![Msg::Increment, Msg::Increment])>{ "Increment Twice" }</button>
+                    <button onclick=|_| Msg::SendRequest>{ "Send" }</button>
                 </nav>
-                <p>{ self.value }</p>
-                <p>{ Date::new().to_string() }</p>
+                <pre>{ self.value.as_str() }</pre>
             </div>
         }
     }
