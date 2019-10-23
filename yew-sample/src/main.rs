@@ -26,12 +26,14 @@ struct Model {
     link: ComponentLink<Model>,
     ft: Option<FetchTask>,
     svg: String,
+    username: String,
 }
 
 enum Msg {
     SendRequest,
     FetchReady(Result<String, Error>),
     Ignore,
+    UpdateEdit(String),
 }
 
 impl Component for Model {
@@ -45,6 +47,7 @@ impl Component for Model {
             console: ConsoleService::new(),
             ft: None,
             svg: String::from(""),
+            username: String::from(""),
         }
     }
 
@@ -59,7 +62,7 @@ impl Component for Model {
                         Msg::Ignore
                     }
                 });
-                let request = Request::get("http://127.0.0.1:8080/hioki-daichi")
+                let request = Request::get(format!("http://127.0.0.1:8080/{}", self.username))
                     .body(Nothing)
                     .unwrap();
                 self.ft = Some(self.fetch_service.fetch(request, callback));
@@ -69,6 +72,10 @@ impl Component for Model {
             }
             Msg::Ignore => {
                 self.console.log("ignore");
+            }
+            Msg::UpdateEdit(val) => {
+                self.console.log(&format!("val: {}", &val));
+                self.username = val;
             }
         }
         true
@@ -87,6 +94,7 @@ impl Renderable<Model> for Model {
 
         html! {
             <div>
+                <input type="text" oninput=|e| Msg::UpdateEdit(e.value) />
                 <button onclick=|_| Msg::SendRequest>{ "Send" }</button>
                 { vnode }
             </div>
