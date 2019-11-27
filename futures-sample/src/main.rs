@@ -1,14 +1,14 @@
-use failure::{Error, Fail};
+use failure::{Error, Fail, format_err};
 
 fn main() {
-    let fut = f(100);
+    let fut = f(101);
     println!("{:?}", futures::executor::block_on(fut));
 }
 
 async fn f(a: u32) -> Result<u32, Error> {
     let b = add1(a).await?;
     let c = mul3(b).await?;
-    cause_err(c).await
+    cause_err(c).await.map_err(|_| format_err!("AAAAAAAA {:?}", "BBBBBBBB"))
 }
 
 async fn add1(a: u32) -> Result<u32, Error> {
