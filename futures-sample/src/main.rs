@@ -1,4 +1,4 @@
-use failure::{format_err, Error, Fail};
+use failure::{Error, Fail};
 
 fn main() {
     let fut = f(100);
@@ -20,12 +20,12 @@ async fn mul3(a: u32) -> Result<u32, Error> {
 }
 
 #[derive(Debug, Fail)]
-#[fail(display = "my wrapping error")]
-struct WrappingError(#[fail(cause)] Error);
+#[fail(display = "foo")]
+struct Foo;
 
 async fn cause_err(a: u32) -> Result<u32, Error> {
     if a % 2 == 0 {
-        Err(format_err!("This is even! {:?}", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
+        Err(Foo.into())
     } else {
         Ok(a)
     }
