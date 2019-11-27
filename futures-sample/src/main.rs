@@ -8,7 +8,7 @@ fn main() {
 async fn f(a: u32) -> Result<u32, Error> {
     let b = add1(a).await?;
     let c = mul3(b).await?;
-    cause_err(c).await.map_err(|_| format_err!("AAAAAAAA {:?}", "BBBBBBBB"))
+    cause_err(c).await.map_err(|e| format_err!("display is '{}'", e))
 }
 
 async fn add1(a: u32) -> Result<u32, Error> {
@@ -20,7 +20,7 @@ async fn mul3(a: u32) -> Result<u32, Error> {
 }
 
 #[derive(Debug, Fail)]
-#[fail(display = "foo")]
+#[fail(display = "foobar")]
 struct Foo;
 
 async fn cause_err(a: u32) -> Result<u32, Error> {
