@@ -13,6 +13,7 @@ struct Model {
     reader: ReaderService,
     reader_tasks: Vec<ReaderTask>,
     console: ConsoleService,
+    image_src: Option<String>,
 }
 
 enum Msg {
@@ -30,6 +31,7 @@ impl Component for Model {
             reader: ReaderService::new(),
             reader_tasks: vec![],
             console: ConsoleService::new(),
+            image_src: None,
         }
     }
 
@@ -53,8 +55,8 @@ impl Component for Model {
             }
 
             Msg::LoadedFile(file_data) => {
-                self.console
-                    .log(format!("{:?}", file_data.content).as_str());
+                let content = base64::encode(&file_data.content);
+                self.image_src = Some(format!("data:image/gif;base64,{}", content));
             }
         }
 
@@ -65,6 +67,7 @@ impl Component for Model {
         html! {
             <div>
                 <input type="file" onchange = |change_data| Msg::ChooseFile(change_data) />
+                <img src={self.image_src.as_ref().unwrap_or(&"".to_string())} />
             </div>
         }
     }
