@@ -1,5 +1,6 @@
 use yew::prelude::*;
 use yew::services::ConsoleService;
+use yew::ChangeData;
 
 fn main() {
     yew::start_app::<Model>();
@@ -10,7 +11,9 @@ struct Model {
     console: ConsoleService,
 }
 
-enum Msg {}
+enum Msg {
+    ChooseFile(ChangeData),
+}
 
 impl Component for Model {
     type Message = Msg;
@@ -23,7 +26,11 @@ impl Component for Model {
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        match msg {}
+        match msg {
+            Msg::ChooseFile(change_data) => {
+                self.console.log(format!("{:?}", change_data).as_str());
+            }
+        }
 
         #[allow(unreachable_code)]
         true
@@ -32,7 +39,7 @@ impl Component for Model {
     fn view(&self) -> Html<Self> {
         html! {
             <div>
-                <input type="file" />
+                <input type="file" onchange=|change_data| Msg::ChooseFile(change_data) />
             </div>
         }
     }
