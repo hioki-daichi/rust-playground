@@ -28,7 +28,11 @@ impl Component for Model {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::ChooseFile(change_data) => {
-                self.console.log(format!("{:?}", change_data).as_str());
+                if let ChangeData::Files(files) = change_data {
+                    for file in files {
+                        self.console.log(format!("{:?}", file).as_str());
+                    }
+                }
             }
         }
 
