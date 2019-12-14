@@ -32,7 +32,7 @@ impl Component for Model {
     fn view(&self) -> Html<Self> {
         html! {
             <div>
-                { "Hello, World" }
+                <input type="file" />
             </div>
         }
     }
