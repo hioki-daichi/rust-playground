@@ -1,5 +1,5 @@
 use yew::prelude::*;
-use yew::services::ConsoleService;
+use yew::services::{reader::ReaderService, ConsoleService};
 use yew::ChangeData;
 
 fn main() {
@@ -9,6 +9,7 @@ fn main() {
 struct Model {
     #[allow(dead_code)]
     console: ConsoleService,
+    reader_service: ReaderService,
 }
 
 enum Msg {
@@ -22,6 +23,7 @@ impl Component for Model {
     fn create(_: Self::Properties, _link: ComponentLink<Self>) -> Self {
         Model {
             console: ConsoleService::new(),
+            reader_service: ReaderService::new(),
         }
     }
 
@@ -30,7 +32,9 @@ impl Component for Model {
             Msg::ChooseFile(change_data) => {
                 if let ChangeData::Files(files) = change_data {
                     for file in files {
-                        self.console.log(format!("{:?}", file).as_str());
+                        let _reader_task = self
+                            .reader_service
+                            .read_file(file, Callback::from(|_| panic!()));
                     }
                 }
             }
