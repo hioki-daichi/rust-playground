@@ -50,7 +50,8 @@ impl Component for Model {
             }
 
             Msg::FileLoaded(file_data) => {
-                self.console.log(format!("{:?}", file_data).as_str());
+                let encoded_data = base64::encode(&file_data.content);
+                self.console.log(format!("{:?}", encoded_data).as_str());
             }
         }
 
