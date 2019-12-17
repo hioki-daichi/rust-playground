@@ -4,7 +4,7 @@ use serde_json::json;
 use yew::format::Json;
 use yew::prelude::*;
 use yew::services::{
-    fetch::Response,
+    fetch::{FetchService, FetchTask, Request, Response},
     reader::{FileData, ReaderService, ReaderTask},
     ConsoleService,
 };
@@ -20,11 +20,15 @@ struct Model {
     reader_service: ReaderService,
     reader_tasks: Vec<ReaderTask>,
     link: ComponentLink<Self>,
+    fetch_service: FetchService,
+    fetch_task: Option<FetchTask>,
 }
 
 enum Msg {
     ChooseFile(ChangeData),
     FileLoaded(FileData),
+    RequestCompleted(Video),
+    RequestFailed,
 }
 
 impl Component for Model {
@@ -37,6 +41,8 @@ impl Component for Model {
             reader_service: ReaderService::new(),
             reader_tasks: vec![],
             link,
+            fetch_service: FetchService::new(),
+            fetch_task: None,
         }
     }
 
@@ -56,7 +62,43 @@ impl Component for Model {
 
             Msg::FileLoaded(file_data) => {
                 let encoded_data = base64::encode(&file_data.content);
-                self.console.log(format!("{:?}", encoded_data).as_str());
+
+                let request_body = json!({
+                    "query":
+                        format!(
+                            "mutation {{ registerVideo(key: \"{}\", data: \"{}\") {{ src }} }}",
+                            file_data.name, encoded_data
+                        )
+                });
+
+                let request = Request::post("http://localhost:8080/graphql")
+                    .header("Content-Type", "application/json")
+                    .body(Json(&request_body))
+                    .expect("Failed to build request.");
+
+                let callback =
+                    self.link
+                        .send_back(move |response: GraphQLResponse<RegisterVideoResponse>| {
+                            let (meta, Json(response_body)) = response.into_parts();
+                            if meta.status.is_success() {
+                                let video = response_body.unwrap().data.registerVideo;
+                                Msg::RequestCompleted(video)
+                            } else {
+                                Msg::RequestFailed
+                            }
+                        });
+
+                let fetch_task = self.fetch_service.fetch(request, callback);
+
+                self.fetch_task = Some(fetch_task);
+            }
+
+            Msg::RequestCompleted(video) => {
+                self.console.log(format!("{:?}", video).as_str());
+            }
+
+            Msg::RequestFailed => {
+                self.console.log("RequestFailed");
             }
         }
 
