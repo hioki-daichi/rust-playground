@@ -1,5 +1,10 @@
+use failure::Error;
+use serde::*;
+use serde_json::json;
+use yew::format::Json;
 use yew::prelude::*;
 use yew::services::{
+    fetch::Response,
     reader::{FileData, ReaderService, ReaderTask},
     ConsoleService,
 };
@@ -66,4 +71,22 @@ impl Component for Model {
             </div>
         }
     }
+}
+
+type GraphQLResponse<T> = Response<Json<Result<ResponseData<T>, Error>>>;
+
+#[derive(Deserialize)]
+struct ResponseData<T> {
+    data: T,
+}
+
+#[derive(Deserialize)]
+#[allow(non_snake_case)]
+struct RegisterVideoResponse {
+    registerVideo: Video,
+}
+
+#[derive(Debug, Deserialize)]
+struct Video {
+    src: String,
 }
