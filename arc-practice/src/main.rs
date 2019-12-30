@@ -13,8 +13,9 @@ impl<T> Stack<T> {
         Self(None)
     }
 
-    pub fn push(self, x: T) -> Self {
-        Self(Some(Rc::new((x, self))))
+    pub fn push(&mut self, x: T) {
+        let this = Self(self.0.take());
+        self.0 = Some(Rc::new((x, this)));
     }
 
     pub fn peek(&self) -> Option<&T> {
@@ -27,24 +28,23 @@ impl<T> Stack<T> {
 }
 
 impl<T: Clone> Stack<T> {
-    pub fn pop(self) -> (Self, Option<T>) {
-        if let Some(rc) = self.0 {
+    pub fn pop(&mut self) -> Option<T> {
+        let this = Self(self.0.take());
+        if let Some(rc) = this.0 {
             let (head, tail) = Rc::try_unwrap(rc).unwrap_or_else(|rc| (*rc).clone());
-            (tail, Some(head))
+            *self = tail;
+            Some(head)
         } else {
-            (Self(None), None)
+            None
         }
     }
 }
 
 fn main() {
-    let s: Stack<i32> = Stack::new();
+    let mut s: Stack<i32> = Stack::new();
     assert_eq!(s.peek(), None);
-
-    let s = s.push(42);
+    s.push(42);
     assert_eq!(s.peek(), Some(&42));
-
-    let (s, head) = s.pop();
-    assert_eq!(head, Some(42));
+    assert_eq!(s.pop(), Some(42));
     assert_eq!(s.peek(), None);
 }
