@@ -1,31 +1,50 @@
-use std::sync::{Arc, Mutex};
-use std::thread;
+use std::rc::Rc;
 
-fn main() {
-    let counter = Arc::new(Mutex::new(0));
+pub struct Stack<T>(Option<Rc<(T, Stack<T>)>>);
 
-    let thread = thread::spawn({
-        let counter = counter.clone();
-        move || {
-            for _ in 0..100000 {
-                let mut counter = counter.lock().unwrap();
+impl<T> Clone for Stack<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
 
-                if *counter % 2 == 0 {
-                    *counter += 1
-                }
-            }
-        }
-    });
-
-    for _ in 0..100000 {
-        let mut counter = counter.lock().unwrap();
-        if *counter % 2 == 1 {
-            *counter += 1
-        }
+impl<T> Stack<T> {
+    pub fn new() -> Self {
+        Self(None)
     }
 
-    thread.join().unwrap();
+    pub fn push(self, x: T) -> Self {
+        Self(Some(Rc::new((x, self))))
+    }
 
-    let counter = *counter.lock().unwrap();
-    println!("{:?}", counter);
+    pub fn peek(&self) -> Option<&T> {
+        if let Some(rc) = &self.0 {
+            Some(&rc.0)
+        } else {
+            None
+        }
+    }
+}
+
+impl<T: Clone> Stack<T> {
+    pub fn pop(self) -> (Self, Option<T>) {
+        if let Some(rc) = self.0 {
+            let (head, tail) = Rc::try_unwrap(rc).unwrap_or_else(|rc| (*rc).clone());
+            (tail, Some(head))
+        } else {
+            (Self(None), None)
+        }
+    }
+}
+
+fn main() {
+    let s: Stack<i32> = Stack::new();
+    assert_eq!(s.peek(), None);
+
+    let s = s.push(42);
+    assert_eq!(s.peek(), Some(&42));
+
+    let (s, head) = s.pop();
+    assert_eq!(head, Some(42));
+    assert_eq!(s.peek(), None);
 }
