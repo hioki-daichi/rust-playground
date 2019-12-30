@@ -1,16 +1,14 @@
 use std::rc::Rc;
+// use std::sync::Arc;
+use std::thread;
 
 fn main() {
-    let x = Rc::new(42);
+    // let rc = Arc::new(42);
+    let rc = Rc::new(42);
 
-    assert_eq!(Rc::strong_count(&x), 1);
+    println!("{:?}", rc);
 
-    let y = x.clone();
+    let thread = thread::spawn(move || eprintln!("value = {}", rc));
 
-    assert_eq!(Rc::strong_count(&y), 2);
-
-    assert!(Rc::ptr_eq(&x, &y));
-
-    eprintln!("x = {0:p} (points to {0:})", x);
-    eprintln!("x = {0:p} (points to {0:})", y);
+    thread.join().unwrap();
 }
